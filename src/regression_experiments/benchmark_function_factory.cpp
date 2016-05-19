@@ -7,16 +7,15 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
 {
   registerBuilder("sin",
                   [](TiXmlNode * node)
-                  { 
+                  {
                     (void)node;
                     Eigen::MatrixXd limits(1,2);
-                    limits << - 4 * M_PI , 4 * M_PI; 
+                    limits << - 4 * M_PI, 4 * M_PI; 
                     return new BenchmarkFunction("sin", &sin, limits);
                   });
-
   registerBuilder("abs",
                   [](TiXmlNode * node)
-                  { 
+                  {
                     (void)node;
                     Eigen::MatrixXd limits(1,2);
                     limits << - 2 , 2; 
