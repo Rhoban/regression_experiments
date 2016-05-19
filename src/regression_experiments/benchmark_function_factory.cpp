@@ -22,7 +22,6 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     limits << - 2 , 2; 
                     return new BenchmarkFunction("abs", &fabs, limits);
                   });
-
 }
 
 }

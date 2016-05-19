@@ -58,30 +58,26 @@ int main(int argc, char ** argv)
   auto engine = rosban_random::getRandomEngine();
 
   // Setting problem properties
-  Eigen::MatrixXd limits(1,2);
-  limits(0,0) = -8;
-  limits(0,1) = 8;
   int nb_samples = 50;
   int nb_prediction_points = 1000;
 
   // The function to fit
   BenchmarkFunctionFactory bff;
   std::unique_ptr<BenchmarkFunction> benchmark_function(bff.build("abs"));
-  std::function<double(const Eigen::VectorXd &)> f = benchmark_function->f;
 
   // Generating random input
-  Eigen::MatrixXd samples = rosban_random::getUniformSamplesMatrix(limits, nb_samples, &engine);
-
-  // Generating output
-  Eigen::VectorXd observations = rosban_gp::generateObservations(samples, f, 0.05, &engine);
+  Eigen::MatrixXd samples;
+  Eigen::VectorXd observations;
+  benchmark_function->getUniformSamples(nb_samples, samples, observations, &engine);
 
   ExtraTrees solver;
-  solver.conf =  ExtraTrees::Config::generateAuto(limits, observations.size(),
+  solver.conf =  ExtraTrees::Config::generateAuto(benchmark_function->limits,
+                                                  nb_samples,
                                                   ApproximationType::GP);
 
   // Building TrainingSet:
 
-  TrainingSet ts(limits.rows());
+  TrainingSet ts(benchmark_function->limits.rows());
 
   for (int sample_id = 0; sample_id < samples.cols(); sample_id++)
   {
@@ -89,7 +85,7 @@ int main(int argc, char ** argv)
     ts.push(s);
   }
 
-  std::unique_ptr<Forest> forest = solver.solve(ts, limits);
+  std::unique_ptr<Forest> forest = solver.solve(ts, benchmark_function->limits);
 
    // Writing predictions + points
   std::ofstream out;
@@ -107,8 +103,8 @@ int main(int argc, char ** argv)
   for (int point = 0; point < nb_prediction_points; point++)
   {
     // Computing input
-    double delta = limits(0,1) - limits(0,0);
-    double x = limits(0,0) + delta * point / nb_prediction_points;
+    double delta = benchmark_function->limits(0,1) - benchmark_function->limits(0,0);
+    double x = benchmark_function->limits(0,0) + delta * point / nb_prediction_points;
     Eigen::VectorXd prediction_input(1);
     prediction_input(0) = x; 
     // Retrieving gaussian processes (TODO implement in another manner)

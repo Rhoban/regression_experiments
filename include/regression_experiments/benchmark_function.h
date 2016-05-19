@@ -22,7 +22,15 @@ public:
   /// Easy binding for one dimensional functions
   BenchmarkFunction(const std::string & name,
                     std::function<double(double)> f,
-                    const Eigen::MatrixXd limits); 
+                    const Eigen::MatrixXd limits);
+
+  /// Create samples and place them in the provided arguments
+  /// Use engine if provided, otherwise, it creates its own engine
+  void getUniformSamples(int nb_samples,
+                         Eigen::MatrixXd & samples,
+                         Eigen::VectorXd & observations,
+                         std::default_random_engine * engine = NULL);
+
 };
 
 
