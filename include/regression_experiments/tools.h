@@ -10,4 +10,24 @@ namespace regression_experiments
 Eigen::MatrixXd discretizeSpace(const Eigen::MatrixXd & limits,
                                 const std::vector<int> & samples_by_dim);
 
+/// 1. Create random samples of the given function
+/// 2. Solve them using the chosen solver
+/// 3. Predict the output on the given grid
+void buildPrediction(const std::string & function_name,
+                     int nb_samples,
+                     const std::string & solver_name,
+                     const std::vector<int> & points_by_dim,
+                     Eigen::MatrixXd & samples_inputs,
+                     Eigen::VectorXd & samples_outputs,
+                     Eigen::MatrixXd & prediction_points,
+                     Eigen::VectorXd & prediction_means,
+                     Eigen::VectorXd & prediction_vars);
+
+void writePrediction(const std::string & path,
+                     const Eigen::MatrixXd & samples_inputs,
+                     const Eigen::VectorXd & samples_outputs,
+                     const Eigen::MatrixXd & prediction_points,
+                     const Eigen::VectorXd & prediction_means,
+                     const Eigen::VectorXd & prediction_vars);
+
 }
