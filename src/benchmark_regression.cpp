@@ -19,9 +19,9 @@ int main(int argc, char ** argv)
   int nb_prediction_points = 200;
   int nb_trials_per_type = 10;
 
-  std::vector<int> nb_samples_vec = {10,25,50};
-  std::vector<std::string> function_names = {"abs","sin"};
-  std::vector<std::string> solver_names = {"gp_forest"};
+  std::vector<int> nb_samples_vec = {25,50,75,100};
+  std::vector<std::string> function_names = {"abs","sin","binary"};
+  std::vector<std::string> solver_names = {"gp","gp_forest"};
 
   // Creating random engine
   auto engine = rosban_random::getRandomEngine();
@@ -29,7 +29,7 @@ int main(int argc, char ** argv)
   std::ofstream out;
   out.open("benchmark_regression.csv");
   // Write csv header
-  out << "function,"
+  out << "function_name,"
       << "solver,"
       << "nb_samples,"
       << "smse,"

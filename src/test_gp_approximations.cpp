@@ -16,7 +16,7 @@ int main(int argc, char ** argv)
   // Setting problem properties
   int nb_samples = 50;
   int nb_prediction_points = 1000;
-  std::string function_name("abs");
+  std::string function_name("sin");
   std::string solver_name("gp_forest");
 
   Eigen::MatrixXd samples_inputs;

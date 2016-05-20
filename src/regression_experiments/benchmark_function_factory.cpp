@@ -21,6 +21,17 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     limits << - 2 , 2; 
                     return new BenchmarkFunction("abs", &fabs, limits, 0.05);
                   });
+  registerBuilder("binary",
+                  [](TiXmlNode * node)
+                  {
+                    (void)node;
+                    Eigen::MatrixXd limits(1,2);
+                    limits << - 2 , 2; 
+                    return new BenchmarkFunction("binary",
+                                                 [](const Eigen::VectorXd & input)
+                                                 { return input(0) > 0; },
+                                                 limits, 0.05);
+                  });
 }
 
 }
