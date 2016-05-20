@@ -2,10 +2,16 @@
 #include "regression_experiments/solver_factory.h"
 #include "regression_experiments/tools.h"
 
+#include "rosban_gp/scoring.h"
+
+#include "rosban_utils/time_stamp.h"
+
 #include "rosban_random/tools.h"
 
 #include <fstream>
 #include <memory>
+
+using rosban_utils::TimeStamp;
 
 namespace regression_experiments
 {
@@ -68,6 +74,55 @@ void buildPrediction(const std::string & function_name,
   // Predicting
   prediction_points = discretizeSpace(benchmark_function->limits, points_by_dim);
   solver->predict(prediction_points, prediction_means, prediction_vars);
+}
+
+void runBenchmark(const std::string & function_name,
+                  int nb_samples,
+                  const std::string & solver_name,
+                  int nb_test_points,
+                  double & smse,
+                  double & learning_time_ms,
+                  double & prediction_time_ms,
+                  std::default_random_engine * engine)
+{
+  // Internal data:
+  Eigen::MatrixXd samples_inputs;
+  Eigen::VectorXd samples_outputs;
+  Eigen::MatrixXd test_points;
+  Eigen::VectorXd test_observations, prediction_means, prediction_vars;
+                    
+  bool clean_engine = false;
+  // getting random engine
+  if (engine == NULL) {
+    engine = rosban_random::newRandomEngine();
+    clean_engine = true;
+  }
+  // Building function
+  BenchmarkFunctionFactory bff;
+  std::unique_ptr<BenchmarkFunction> benchmark_function(bff.build(function_name));
+  // Generating samples and test points
+  benchmark_function->getUniformSamples(nb_samples, samples_inputs, samples_outputs,
+                                        engine);
+  benchmark_function->getUniformSamples(nb_test_points, test_points, test_observations,
+                                        engine);
+  // Solving
+  TimeStamp learning_start = TimeStamp::now();
+  std::unique_ptr<Solver> solver(SolverFactory().build(solver_name));
+  solver->solve(samples_inputs, samples_outputs, benchmark_function->limits);
+  TimeStamp learning_end = TimeStamp::now();
+  // Getting predictions for test points
+  TimeStamp prediction_start = TimeStamp::now();
+  solver->predict(test_points, prediction_means, prediction_vars);
+  TimeStamp prediction_end = TimeStamp::now();
+  // Evaluating prediction
+  // Clean engine if necessary
+  if (clean_engine) {
+    delete(engine);
+  }
+  // Computing output values
+  smse = rosban_gp::computeSMSE(test_observations, prediction_means);
+  learning_time_ms = diffMs(learning_start, learning_end);
+  prediction_time_ms = diffMs(prediction_start, prediction_end);
 }
 
 void writePrediction(const std::string & path,

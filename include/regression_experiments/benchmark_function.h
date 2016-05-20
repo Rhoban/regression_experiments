@@ -15,21 +15,25 @@ public:
   std::string name;
   EvaluationFunction f;
   Eigen::MatrixXd limits;
+  double observation_noise;
 
   BenchmarkFunction(const std::string & name,
                     EvaluationFunction f,
-                    const Eigen::MatrixXd limits);
+                    const Eigen::MatrixXd limits,
+                    double observation_noise);
   /// Easy binding for one dimensional functions
   BenchmarkFunction(const std::string & name,
                     std::function<double(double)> f,
-                    const Eigen::MatrixXd limits);
+                    const Eigen::MatrixXd limits,
+                    double observation_noise);
 
   /// Create samples and place them in the provided arguments
   /// Use engine if provided, otherwise, it creates its own engine
   void getUniformSamples(int nb_samples,
                          Eigen::MatrixXd & samples,
                          Eigen::VectorXd & observations,
-                         std::default_random_engine * engine = NULL);
+                         std::default_random_engine * engine = NULL,
+                         bool apply_noise = true);
 
 };
 

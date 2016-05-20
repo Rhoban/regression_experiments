@@ -23,6 +23,18 @@ void buildPrediction(const std::string & function_name,
                      Eigen::VectorXd & prediction_means,
                      Eigen::VectorXd & prediction_vars);
 
+/// 1. Generate learning and test samples for the given function
+/// 2. Create a regression model using the chosen solver and the generated samples
+/// 3. Evaluate the quality of the regression model using the test set
+void runBenchmark(const std::string & function_name,
+                  int nb_samples,
+                  const std::string & solver_name,
+                  int nb_test_points,
+                  double & smse,
+                  double & learning_time_ms,
+                  double & prediction_time_ms,
+                  std::default_random_engine * engine);
+
 void writePrediction(const std::string & path,
                      const Eigen::MatrixXd & samples_inputs,
                      const Eigen::VectorXd & samples_outputs,
