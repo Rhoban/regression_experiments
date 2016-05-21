@@ -54,8 +54,9 @@ for (i in 1:length(args))
         g <- g + facet_wrap(~function_name, nrow = 1, scales = "free")
         g <- g + geom_point(size = 0.5)
         g <- g + geom_line(size = 0.2)
+        g <- g + scale_y_log10()
         plots <- c(plots,list(g))
     }
     finalG <- arrangeGrob(grobs=plots,nrow=3)
-    ggsave(dst, finalG)
+    ggsave(dst, finalG, width=16, height=9)
 }
