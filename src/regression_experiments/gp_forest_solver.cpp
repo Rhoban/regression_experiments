@@ -20,6 +20,8 @@ using rosban_gp::GaussianProcess;
 namespace regression_experiments
 {
 
+GPForestSolver::~GPForestSolver() {}
+
 void GPForestSolver::solve(const Eigen::MatrixXd & inputs,
                            const Eigen::VectorXd & observations,
                            const Eigen::MatrixXd & limits)

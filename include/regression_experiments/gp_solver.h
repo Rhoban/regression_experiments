@@ -13,6 +13,8 @@ class GPSolver : public Solver
 {
 public:
 
+  virtual ~GPSolver() {}
+
   /// Update internal structure according to the provided samples
   virtual void solve(const Eigen::MatrixXd & inputs,
                      const Eigen::VectorXd & observations,

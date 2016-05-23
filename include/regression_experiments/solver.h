@@ -9,6 +9,8 @@ class Solver
 {
 public:
 
+  virtual ~Solver() {}
+
   /// Update internal structure according to the provided samples
   virtual void solve(const Eigen::MatrixXd & inputs,
                      const Eigen::VectorXd & observations,

@@ -13,6 +13,8 @@ class GPForestSolver : public Solver
 {
 public:
 
+  virtual ~GPForestSolver();
+
   /// Update internal structure according to the provided samples
   virtual void solve(const Eigen::MatrixXd & inputs,
                      const Eigen::VectorXd & observations,
