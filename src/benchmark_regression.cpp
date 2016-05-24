@@ -17,11 +17,11 @@ int main(int argc, char ** argv)
 {
   // Setting benchmark properties
   int nb_prediction_points = 200;
-  int nb_trials_per_type = 20;
+  int nb_trials_per_type = 50;
 
   std::vector<int> nb_samples_vec;
-  for (int i = 1; i <= 8; i++) {
-    nb_samples_vec.push_back(25 * i);
+  for (int i = 1; i <= 10; i++) {
+    nb_samples_vec.push_back(10 * i);
   }
   std::vector<std::string> function_names = {"abs",
                                              "sin",
@@ -29,7 +29,7 @@ int main(int argc, char ** argv)
                                              "deterministic_abs",
                                              "deterministic_sin",
                                              "deterministic_binary"};
-  std::vector<std::string> solver_names = {"gp_forest","gp"};
+  std::vector<std::string> solver_names = {"pwc_forest", "pwl_forest", "gp_forest", "gp"};
 
   // Creating random engine
   auto engine = rosban_random::getRandomEngine();
