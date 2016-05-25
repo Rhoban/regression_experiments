@@ -20,16 +20,35 @@ using rosban_gp::GaussianProcess;
 namespace regression_experiments
 {
 
+GPForestSolver::GPForestSolver(Type t)
+  : type(t)
+{
+}
 GPForestSolver::~GPForestSolver() {}
 
 void GPForestSolver::solve(const Eigen::MatrixXd & inputs,
                            const Eigen::VectorXd & observations,
                            const Eigen::MatrixXd & limits)
 {
+  int nb_samples = observations.rows();
   ExtraTrees solver;
-  solver.conf =  ExtraTrees::Config::generateAuto(limits,
-                                                  observations.rows(),
+  solver.conf =  ExtraTrees::Config::generateAuto(limits, nb_samples,
                                                   ApproximationType::GP);
+
+  // Updating nmin with respect to type
+  switch(type)
+  {
+    case GPForestSolver::Type::SQRT:
+      solver.conf.n_min = std::sqrt(nb_samples);
+      break;
+    case GPForestSolver::Type::CURT:
+      solver.conf.n_min = std::pow(nb_samples, 1.0 / 3);
+      break;
+    case GPForestSolver::Type::LOG2:
+      solver.conf.n_min = std::log2(nb_samples);
+      break;
+  }
+
   TrainingSet ts(inputs, observations);
 
   forest = solver.solve(ts, limits);
@@ -61,6 +80,25 @@ void GPForestSolver::predict(const Eigen::MatrixXd inputs,
     means(point) = mean;
     vars(point) = var;
   }
+}
+
+GPForestSolver::Type loadType(const std::string &s)
+{
+  if (s == "SQRT") return GPForestSolver::Type::SQRT;
+  if (s == "CURT") return GPForestSolver::Type::CURT;
+  if (s == "LOG2") return GPForestSolver::Type::LOG2;
+  throw std::runtime_error("Unknown GPForestSolver::Type: '" + s + "'");
+}
+
+std::string to_string(GPForestSolver::Type type)
+{
+  switch(type)
+  {
+    case GPForestSolver::Type::SQRT: return "SQRT";
+    case GPForestSolver::Type::CURT: return "CURT";
+    case GPForestSolver::Type::LOG2: return "LOG2";
+  }
+  throw std::runtime_error("GPForestSolver::Type unknown in to_string");
 }
 
 }

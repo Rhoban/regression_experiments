@@ -1,5 +1,8 @@
 #include "regression_experiments/benchmark_function_factory.h"
-#include "regression_experiments/solver_factory.h"
+#include "regression_experiments/gp_solver.h"
+#include "regression_experiments/gp_forest_solver.h"
+#include "regression_experiments/pwc_forest_solver.h"
+#include "regression_experiments/pwl_forest_solver.h"
 #include "regression_experiments/tools.h"
 
 #include "rosban_regression_forests/algorithms/extra_trees.h"
@@ -8,6 +11,7 @@
 #include "rosban_random/tools.h"
 
 #include <fstream>
+#include <map>
 
 using namespace regression_experiments;
 
@@ -17,7 +21,7 @@ int main(int argc, char ** argv)
 {
   // Setting benchmark properties
   int nb_prediction_points = 200;
-  int nb_trials_per_type = 50;
+  int nb_trials_per_type = 10;
 
   std::vector<int> nb_samples_vec;
   for (int i = 1; i <= 10; i++) {
@@ -26,10 +30,26 @@ int main(int argc, char ** argv)
   std::vector<std::string> function_names = {"abs",
                                              "sin",
                                              "binary",
+                                             "ternary",
                                              "deterministic_abs",
                                              "deterministic_sin",
-                                             "deterministic_binary"};
-  std::vector<std::string> solver_names = {"pwc_forest", "pwl_forest", "gp_forest", "gp"};
+                                             "deterministic_binary",
+                                             "deterministic_ternary"};
+  std::map<std::string, std::shared_ptr<Solver>> solvers =
+    {
+      {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
+      {"pwl_forest"    , std::shared_ptr<Solver>(new PWLForestSolver()                         )},
+      {"gp_forest_sqrt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::SQRT))},
+      {"gp_forest_curt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::CURT))},
+      {"gp_forest_log2", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::LOG2))}
+//      {"gp"            , std::shared_ptr<Solver>(new GPSolver()                                )}
+    };
+
+  // replace for debug
+  function_names = {"sinus_2dim",
+                    "binary_2dim",
+                    "sinus_3dim",
+                    "binary_3dim"};
 
   // Creating random engine
   auto engine = rosban_random::getRandomEngine();
@@ -46,13 +66,16 @@ int main(int argc, char ** argv)
       << std::endl;
 
   for (const std::string & function_name : function_names) {
-    for (const std::string & solver_name : solver_names) {
+    for (auto & solver_entry : solvers) {
+      const std::string & solver_name = solver_entry.first;
+      std::shared_ptr<Solver> solver = solver_entry.second;
       for (int nb_samples : nb_samples_vec) {
         for (int trial = 0; trial < nb_trials_per_type; trial++) {
+          std::cerr << "trial: " << trial << "/" << nb_trials_per_type << std::endl;
           double smse, learning_time, prediction_time;
           runBenchmark(function_name,
                        nb_samples,
-                       solver_name,
+                       solver,
                        nb_prediction_points,
                        smse,
                        learning_time,

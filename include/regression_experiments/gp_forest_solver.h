@@ -12,6 +12,14 @@ namespace regression_experiments
 class GPForestSolver : public Solver
 {
 public:
+  /// Which type of GPForest is used
+  /// - SQRT: |samples|^{1/2} samples per node min
+  /// - CURT: |samples|^{1/3} samples per node min
+  /// - LOG2: log_2(|samples|)  sampels per node min
+  enum class Type
+  { SQRT, CURT, LOG2};
+
+  GPForestSolver(Type t = Type::SQRT);
 
   virtual ~GPForestSolver();
 
@@ -27,6 +35,9 @@ public:
 
 private:
   std::unique_ptr<regression_forests::Forest> forest;
+  Type type;
 };
+GPForestSolver::Type loadType(const std::string &s);
+std::string to_string(GPForestSolver::Type type);
 
 }

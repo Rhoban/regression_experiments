@@ -1,6 +1,10 @@
 #pragma once
 
+#include "regression_experiments/solver.h"
+
 #include <Eigen/Core>
+
+#include <memory>
 
 namespace regression_experiments
 {
@@ -29,6 +33,15 @@ void buildPrediction(const std::string & function_name,
 void runBenchmark(const std::string & function_name,
                   int nb_samples,
                   const std::string & solver_name,
+                  int nb_test_points,
+                  double & smse,
+                  double & learning_time_ms,
+                  double & prediction_time_ms,
+                  std::default_random_engine * engine);
+
+void runBenchmark(const std::string & function_name,
+                  int nb_samples,
+                  std::shared_ptr<Solver> solver,
                   int nb_test_points,
                   double & smse,
                   double & learning_time_ms,

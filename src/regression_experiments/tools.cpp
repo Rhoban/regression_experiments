@@ -85,6 +85,26 @@ void runBenchmark(const std::string & function_name,
                   double & prediction_time_ms,
                   std::default_random_engine * engine)
 {
+  std::shared_ptr<Solver> solver(SolverFactory().build(solver_name));
+  runBenchmark(function_name,
+               nb_samples,
+               solver,
+               nb_test_points,
+               smse,
+               learning_time_ms,
+               prediction_time_ms,
+               engine);
+}
+
+void runBenchmark(const std::string & function_name,
+                  int nb_samples,
+                  std::shared_ptr<Solver> solver,
+                  int nb_test_points,
+                  double & smse,
+                  double & learning_time_ms,
+                  double & prediction_time_ms,
+                  std::default_random_engine * engine)
+{
   // Internal data:
   Eigen::MatrixXd samples_inputs;
   Eigen::VectorXd samples_outputs;
@@ -107,7 +127,6 @@ void runBenchmark(const std::string & function_name,
                                         engine);
   // Solving
   TimeStamp learning_start = TimeStamp::now();
-  std::unique_ptr<Solver> solver(SolverFactory().build(solver_name));
   solver->solve(samples_inputs, samples_outputs, benchmark_function->limits);
   TimeStamp learning_end = TimeStamp::now();
   // Getting predictions for test points
