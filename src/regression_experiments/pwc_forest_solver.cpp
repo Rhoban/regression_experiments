@@ -43,4 +43,10 @@ void PWCForestSolver::predict(const Eigen::MatrixXd inputs,
   }
 }
 
+void PWCForestSolver::gradients(const Eigen::MatrixXd inputs,
+                               Eigen::MatrixXd & gradients)
+{
+  throw std::runtime_error("PWCForestSolver::gradients: not implemented");
+}
+
 }

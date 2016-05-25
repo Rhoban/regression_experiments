@@ -82,6 +82,12 @@ void GPForestSolver::predict(const Eigen::MatrixXd inputs,
   }
 }
 
+void GPForestSolver::gradients(const Eigen::MatrixXd inputs,
+                               Eigen::MatrixXd & gradients)
+{
+  throw std::runtime_error("GPForestSolver::gradients: not implemented");
+}
+
 GPForestSolver::Type loadType(const std::string &s)
 {
   if (s == "SQRT") return GPForestSolver::Type::SQRT;

@@ -25,7 +25,8 @@ void buildPrediction(const std::string & function_name,
                      Eigen::VectorXd & samples_outputs,
                      Eigen::MatrixXd & prediction_points,
                      Eigen::VectorXd & prediction_means,
-                     Eigen::VectorXd & prediction_vars);
+                     Eigen::VectorXd & prediction_vars,
+                     Eigen::MatrixXd & gradients);
 
 /// 1. Generate learning and test samples for the given function
 /// 2. Create a regression model using the chosen solver and the generated samples
@@ -53,6 +54,7 @@ void writePrediction(const std::string & path,
                      const Eigen::VectorXd & samples_outputs,
                      const Eigen::MatrixXd & prediction_points,
                      const Eigen::VectorXd & prediction_means,
-                     const Eigen::VectorXd & prediction_vars);
+                     const Eigen::VectorXd & prediction_vars,
+                     const Eigen::MatrixXd & gradients);
 
 }

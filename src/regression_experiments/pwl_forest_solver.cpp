@@ -43,4 +43,10 @@ void PWLForestSolver::predict(const Eigen::MatrixXd inputs,
   }
 }
 
+void PWLForestSolver::gradients(const Eigen::MatrixXd inputs,
+                               Eigen::MatrixXd & gradients)
+{
+  throw std::runtime_error("PWLForestSolver::gradients: not implemented");
+}
+
 }

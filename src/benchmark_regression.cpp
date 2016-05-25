@@ -22,10 +22,14 @@ int main(int argc, char ** argv)
   // Setting benchmark properties
   int nb_prediction_points = 200;
   int nb_trials_per_type = 10;
+  // Maximal learning time in [ms]
+  double max_learning_time = std::pow(10,5);
+  // Maximal prediction time in [ms] (5ms per predicted point)
+  double max_prediction_time = nb_prediction_points * 5;
 
   std::vector<int> nb_samples_vec;
-  for (int i = 1; i <= 10; i++) {
-    nb_samples_vec.push_back(10 * i);
+  for (int i = 1; i <= 20; i++) {
+    nb_samples_vec.push_back(50 * i);
   }
   std::vector<std::string> function_names = {"abs",
                                              "sin",
@@ -70,6 +74,8 @@ int main(int argc, char ** argv)
       const std::string & solver_name = solver_entry.first;
       std::shared_ptr<Solver> solver = solver_entry.second;
       for (int nb_samples : nb_samples_vec) {
+        double total_prediction_time = 0;
+        double total_learning_time   = 0;
         for (int trial = 0; trial < nb_trials_per_type; trial++) {
           std::cerr << "trial: " << trial << "/" << nb_trials_per_type << std::endl;
           double smse, learning_time, prediction_time;
@@ -87,7 +93,15 @@ int main(int argc, char ** argv)
               << smse            << ","
               << learning_time   << ","
               << prediction_time << std::endl;
+          // Cumulating time
+          total_learning_time   += learning_time;
+          total_prediction_time += prediction_time;
         }
+        double avg_learning_time    = total_learning_time   / nb_trials_per_type;
+        double avg_prediction_time  = total_prediction_time / nb_trials_per_type;
+        // Do not compute with higher number of samples if time is already above the threshold
+        if (avg_learning_time   > max_learning_time  ) break;
+        if (avg_prediction_time > max_prediction_time) break;
       }
     }
   }

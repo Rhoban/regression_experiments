@@ -25,6 +25,9 @@ public:
                        Eigen::VectorXd & means,
                        Eigen::VectorXd & vars) override;
 
+  virtual void gradients(const Eigen::MatrixXd inputs,
+                         Eigen::MatrixXd & gradients) override;
+
 private:
   std::unique_ptr<regression_forests::Forest> forest;
 };

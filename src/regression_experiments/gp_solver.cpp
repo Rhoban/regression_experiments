@@ -41,5 +41,13 @@ void GPSolver::predict(const Eigen::MatrixXd inputs,
     vars(point) = var;
   }
 }
+void GPSolver::gradients(const Eigen::MatrixXd inputs,
+                         Eigen::MatrixXd & gradients)
+{
+  gradients = Eigen::MatrixXd::Zero(inputs.rows(), inputs.cols());
+  for (int col = 0; col < inputs.cols(); col++) {
+    gradients.col(col) = gp.getGradient(inputs.col(col));
+  }
+}
 
 }

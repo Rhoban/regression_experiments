@@ -16,13 +16,13 @@ int main(int argc, char ** argv)
   // Setting problem properties
   int nb_samples = 50;
   int nb_prediction_points = 1000;
-  std::string function_name("deterministic_binary");
+  std::string function_name("sin");
   std::string solver_name("gp");
 
   Eigen::MatrixXd samples_inputs;
   Eigen::VectorXd samples_outputs;
 
-  Eigen::MatrixXd prediction_points;
+  Eigen::MatrixXd prediction_points, gradients;
   Eigen::VectorXd prediction_means, prediction_vars;
 
   buildPrediction(function_name,
@@ -33,7 +33,8 @@ int main(int argc, char ** argv)
                   samples_outputs,
                   prediction_points,
                   prediction_means,
-                  prediction_vars);
+                  prediction_vars,
+                  gradients);
 
   std::ostringstream oss;
   oss << function_name << "_" << nb_samples << "_" << solver_name << ".csv";
@@ -43,5 +44,6 @@ int main(int argc, char ** argv)
                   samples_outputs,
                   prediction_points,
                   prediction_means,
-                  prediction_vars);
+                  prediction_vars,
+                  gradients);
 }

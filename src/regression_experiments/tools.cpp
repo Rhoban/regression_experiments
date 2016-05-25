@@ -59,7 +59,8 @@ void buildPrediction(const std::string & function_name,
                      Eigen::VectorXd & samples_outputs,
                      Eigen::MatrixXd & prediction_points,
                      Eigen::VectorXd & prediction_means,
-                     Eigen::VectorXd & prediction_vars)
+                     Eigen::VectorXd & prediction_vars,
+                     Eigen::MatrixXd & gradients)
 {
   // getting random engine
   auto engine = rosban_random::getRandomEngine();
@@ -74,6 +75,7 @@ void buildPrediction(const std::string & function_name,
   // Predicting
   prediction_points = discretizeSpace(benchmark_function->limits, points_by_dim);
   solver->predict(prediction_points, prediction_means, prediction_vars);
+  solver->gradients(prediction_points, gradients);
 }
 
 void runBenchmark(const std::string & function_name,
@@ -149,19 +151,20 @@ void writePrediction(const std::string & path,
                      const Eigen::VectorXd & samples_outputs,
                      const Eigen::MatrixXd & prediction_points,
                      const Eigen::VectorXd & prediction_means,
-                     const Eigen::VectorXd & prediction_vars)
+                     const Eigen::VectorXd & prediction_vars,
+                     const Eigen::MatrixXd & gradients)
 {
   // Writing predictions + points
   std::ofstream out;
   out.open(path);
-  out << "type,input,mean,min,max" << std::endl;
+  out << "type,input,mean,min,max,gradient" << std::endl;
 
   // Writing Ref points
   for (int i = 0; i < samples_inputs.cols(); i++)
   {
     // write with the same format but min and max carry no meaning
     out << "observation," << samples_inputs(0,i) << ","
-        << samples_outputs(i) << ",0,0" << std::endl;
+        << samples_outputs(i) << ",0,0,0" << std::endl;
   }
 
   // Writing predictions
@@ -176,7 +179,7 @@ void writePrediction(const std::string & path,
     double max = mean + interval;
     // Writing line
     out << "prediction," << prediction_input(0) << ","
-        << mean << "," << min << "," << max << std::endl;
+        << mean << "," << min << "," << max << "," << gradients(0,point) << std::endl;
   }
   out.close();
 }

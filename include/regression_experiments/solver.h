@@ -20,6 +20,10 @@ public:
   virtual void predict(const Eigen::MatrixXd inputs,
                        Eigen::VectorXd & means,
                        Eigen::VectorXd & vars) = 0;
+
+  /// Predict the gradients independently using internal structure
+  virtual void gradients(const Eigen::MatrixXd inputs,
+                         Eigen::MatrixXd & gradients) = 0;
 };
 
 }
