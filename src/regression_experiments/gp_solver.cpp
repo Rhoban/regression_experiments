@@ -56,7 +56,7 @@ void GPSolver::getMaximum(const Eigen::MatrixXd & limits,
                           Eigen::VectorXd & input, double & output)
 {
   // rProp properties
-  int nb_trials = 10;
+  int nb_trials = 25;
   double epsilon = std::pow(10, -6);
   int max_nb_guess = 1000;
   // Creating random initial guesses and random initial steps

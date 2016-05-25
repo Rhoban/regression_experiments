@@ -38,6 +38,9 @@ void runBenchmark(const std::string & function_name,
                   double & smse,
                   double & learning_time_ms,
                   double & prediction_time_ms,
+                  double & expected_max,
+                  double & value_at_arg_max,
+                  double & compute_max_time_ms,
                   std::default_random_engine * engine);
 
 void runBenchmark(const std::string & function_name,
@@ -47,6 +50,9 @@ void runBenchmark(const std::string & function_name,
                   double & smse,
                   double & learning_time_ms,
                   double & prediction_time_ms,
+                  double & expected_max,
+                  double & value_at_arg_max,
+                  double & compute_max_time_ms,
                   std::default_random_engine * engine);
 
 void writePrediction(const std::string & path,

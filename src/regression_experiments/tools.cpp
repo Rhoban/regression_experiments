@@ -85,6 +85,9 @@ void runBenchmark(const std::string & function_name,
                   double & smse,
                   double & learning_time_ms,
                   double & prediction_time_ms,
+                  double & expected_max,
+                  double & value_at_arg_max,
+                  double & compute_max_time_ms,
                   std::default_random_engine * engine)
 {
   std::shared_ptr<Solver> solver(SolverFactory().build(solver_name));
@@ -95,6 +98,9 @@ void runBenchmark(const std::string & function_name,
                smse,
                learning_time_ms,
                prediction_time_ms,
+               expected_max,
+               value_at_arg_max,
+               compute_max_time_ms,
                engine);
 }
 
@@ -105,6 +111,9 @@ void runBenchmark(const std::string & function_name,
                   double & smse,
                   double & learning_time_ms,
                   double & prediction_time_ms,
+                  double & expected_max,
+                  double & value_at_arg_max,
+                  double & compute_max_time_ms,
                   std::default_random_engine * engine)
 {
   // Internal data:
@@ -140,10 +149,24 @@ void runBenchmark(const std::string & function_name,
   if (clean_engine) {
     delete(engine);
   }
+
+  // Computing max
+  Eigen::VectorXd best_input;
+  TimeStamp get_max_start = TimeStamp::now();
+  solver->getMaximum(benchmark_function->limits, best_input, expected_max);
+  TimeStamp get_max_end = TimeStamp::now();
+  int nb_max_tests = 100;
+  value_at_arg_max = 0;
+  for (int i = 0; i < nb_max_tests; i++) {
+    value_at_arg_max += benchmark_function->f(best_input);
+  }
+  value_at_arg_max /= nb_max_tests;
+
   // Computing output values
   smse = rosban_gp::computeSMSE(test_observations, prediction_means);
   learning_time_ms = diffMs(learning_start, learning_end);
   prediction_time_ms = diffMs(prediction_start, prediction_end);
+  compute_max_time_ms = diffMs(get_max_start, get_max_end);
 }
 
 void writePrediction(const std::string & path,

@@ -28,8 +28,8 @@ int main(int argc, char ** argv)
   double max_prediction_time = nb_prediction_points * 5;
 
   std::vector<int> nb_samples_vec;
-  for (int i = 1; i <= 20; i++) {
-    nb_samples_vec.push_back(50 * i);
+  for (int i = 1; i <= 4; i++) {
+    nb_samples_vec.push_back(25 * i);
   }
   std::vector<std::string> function_names = {"abs",
                                              "sin",
@@ -41,12 +41,12 @@ int main(int argc, char ** argv)
                                              "deterministic_ternary"};
   std::map<std::string, std::shared_ptr<Solver>> solvers =
     {
-      {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
-      {"pwl_forest"    , std::shared_ptr<Solver>(new PWLForestSolver()                         )},
-      {"gp_forest_sqrt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::SQRT))},
-      {"gp_forest_curt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::CURT))},
-      {"gp_forest_log2", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::LOG2))}
-//      {"gp"            , std::shared_ptr<Solver>(new GPSolver()                                )}
+//      {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
+//      {"pwl_forest"    , std::shared_ptr<Solver>(new PWLForestSolver()                         )},
+//      {"gp_forest_sqrt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::SQRT))},
+//      {"gp_forest_curt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::CURT))},
+//      {"gp_forest_log2", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::LOG2))}
+      {"gp"            , std::shared_ptr<Solver>(new GPSolver()                                )}
     };
 
   // replace for debug
@@ -54,13 +54,14 @@ int main(int argc, char ** argv)
                     "binary_2dim",
                     "sinus_3dim",
                     "binary_3dim"};
+  function_names = {"sin"};
 
   // Creating random engine
   auto engine = rosban_random::getRandomEngine();
 
+  // Open and write header for regression benchmark
   std::ofstream out;
   out.open("benchmark_regression.csv");
-  // Write csv header
   out << "function_name,"
       << "solver,"
       << "nb_samples,"
@@ -68,6 +69,18 @@ int main(int argc, char ** argv)
       << "learning_time,"
       << "prediction_time"
       << std::endl;
+  
+  // Open and write header for max benchmark
+  std::ofstream max_out;
+  max_out.open("benchmark_max.csv");
+  max_out << "function_name,"
+          << "solver,"
+          << "nb_samples,"
+          << "expected_max,"
+          << "value_at_arg_max,"
+          << "learning_time,"
+          << "compute_max_time"
+          << std::endl;
 
   for (const std::string & function_name : function_names) {
     for (auto & solver_entry : solvers) {
@@ -79,6 +92,7 @@ int main(int argc, char ** argv)
         for (int trial = 0; trial < nb_trials_per_type; trial++) {
           std::cerr << "trial: " << trial << "/" << nb_trials_per_type << std::endl;
           double smse, learning_time, prediction_time;
+          double expected_max, value_at_arg_max, compute_max_time;
           runBenchmark(function_name,
                        nb_samples,
                        solver,
@@ -86,6 +100,9 @@ int main(int argc, char ** argv)
                        smse,
                        learning_time,
                        prediction_time,
+                       expected_max,
+                       value_at_arg_max,
+                       compute_max_time,
                        &engine);
           out << function_name   << ","
               << solver_name     << ","
@@ -93,6 +110,13 @@ int main(int argc, char ** argv)
               << smse            << ","
               << learning_time   << ","
               << prediction_time << std::endl;
+          max_out << function_name    << ","
+                  << solver_name      << ","
+                  << nb_samples       << ","
+                  << expected_max     << ","
+                  << value_at_arg_max << ","
+                  << learning_time    << ","
+                  << compute_max_time << std::endl;
           // Cumulating time
           total_learning_time   += learning_time;
           total_prediction_time += prediction_time;
