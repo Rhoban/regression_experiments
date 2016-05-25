@@ -24,6 +24,10 @@ public:
   /// Predict the gradients independently using internal structure
   virtual void gradients(const Eigen::MatrixXd inputs,
                          Eigen::MatrixXd & gradients) = 0;
+
+  /// Return argmax(f) and max(f) inside the provided limits
+  virtual void getMaximum(const Eigen::MatrixXd & limits,
+                          Eigen::VectorXd & input, double & output) = 0;
 };
 
 }

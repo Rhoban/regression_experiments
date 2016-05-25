@@ -49,4 +49,10 @@ void PWLForestSolver::gradients(const Eigen::MatrixXd inputs,
   throw std::runtime_error("PWLForestSolver::gradients: not implemented");
 }
 
+void PWLForestSolver::getMaximum(const Eigen::MatrixXd & limits,
+                                 Eigen::VectorXd & input, double & output)
+{
+  throw std::runtime_error("PWLForestSolver::getMaximum: not implemented");
+}
+
 }

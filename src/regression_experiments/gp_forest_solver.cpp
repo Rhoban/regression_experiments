@@ -88,6 +88,12 @@ void GPForestSolver::gradients(const Eigen::MatrixXd inputs,
   throw std::runtime_error("GPForestSolver::gradients: not implemented");
 }
 
+void GPForestSolver::getMaximum(const Eigen::MatrixXd & limits,
+                                Eigen::VectorXd & input, double & output)
+{
+  throw std::runtime_error("GPForestSolver::getMaximum: not implemented");
+}
+
 GPForestSolver::Type loadType(const std::string &s)
 {
   if (s == "SQRT") return GPForestSolver::Type::SQRT;

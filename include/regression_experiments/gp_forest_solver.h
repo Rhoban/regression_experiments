@@ -36,6 +36,9 @@ public:
   virtual void gradients(const Eigen::MatrixXd inputs,
                          Eigen::MatrixXd & gradients) override;
 
+  virtual void getMaximum(const Eigen::MatrixXd & limits,
+                          Eigen::VectorXd & input, double & output) override;
+
 private:
   std::unique_ptr<regression_forests::Forest> forest;
   Type type;
