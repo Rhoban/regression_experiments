@@ -30,7 +30,7 @@ void PWLForestSolver::solve(const Eigen::MatrixXd & inputs,
   forest = solver.solve(ts, limits);
 }
 
-void PWLForestSolver::predict(const Eigen::MatrixXd inputs,
+void PWLForestSolver::predict(const Eigen::MatrixXd & inputs,
                              Eigen::VectorXd & means,
                              Eigen::VectorXd & vars)
 {
@@ -43,7 +43,7 @@ void PWLForestSolver::predict(const Eigen::MatrixXd inputs,
   }
 }
 
-void PWLForestSolver::gradients(const Eigen::MatrixXd inputs,
+void PWLForestSolver::gradients(const Eigen::MatrixXd & inputs,
                                Eigen::MatrixXd & gradients)
 {
   throw std::runtime_error("PWLForestSolver::gradients: not implemented");
@@ -52,7 +52,15 @@ void PWLForestSolver::gradients(const Eigen::MatrixXd inputs,
 void PWLForestSolver::getMaximum(const Eigen::MatrixXd & limits,
                                  Eigen::VectorXd & input, double & output)
 {
-  throw std::runtime_error("PWLForestSolver::getMaximum: not implemented");
+  int max_action_tiles = 20000;
+  std::unique_ptr<regression_forests::Tree> sub_tree;
+  sub_tree = forest->unifiedProjectedTree(limits, max_action_tiles);
+
+  std::pair<double, Eigen::VectorXd> max_pair;
+  max_pair = sub_tree->getMaxPair(limits);
+
+  input = max_pair.second;
+  output = max_pair.first;
 }
 
 }

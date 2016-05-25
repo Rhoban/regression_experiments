@@ -11,7 +11,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     (void)node;
                     Eigen::MatrixXd limits(1,2);
                     limits << - 4 * M_PI, 4 * M_PI; 
-                    return new BenchmarkFunction("sin", &sin, limits, 0.05);
+                    return new BenchmarkFunction("sin", &sin, limits, 0.05, 1);
                   });
   registerBuilder("deterministic_sin",
                   [](TiXmlNode * node)
@@ -19,7 +19,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     (void)node;
                     Eigen::MatrixXd limits(1,2);
                     limits << - 4 * M_PI, 4 * M_PI; 
-                    return new BenchmarkFunction("deterministic_sin", &sin, limits, 0.0);
+                    return new BenchmarkFunction("deterministic_sin", &sin, limits, 0.0, 1);
                   });
   registerBuilder("abs",
                   [](TiXmlNode * node)
@@ -27,7 +27,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     (void)node;
                     Eigen::MatrixXd limits(1,2);
                     limits << - 2 , 2; 
-                    return new BenchmarkFunction("abs", &fabs, limits, 0.05);
+                    return new BenchmarkFunction("abs", &fabs, limits, 0.05, 2);
                   });
   registerBuilder("deterministic_abs",
                   [](TiXmlNode * node)
@@ -35,7 +35,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     (void)node;
                     Eigen::MatrixXd limits(1,2);
                     limits << - 2 , 2; 
-                    return new BenchmarkFunction("deterministic_abs", &fabs, limits, 0.0);
+                    return new BenchmarkFunction("deterministic_abs", &fabs, limits, 0.0, 2);
                   });
   registerBuilder("binary",
                   [](TiXmlNode * node)
@@ -46,7 +46,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     return new BenchmarkFunction("binary",
                                                  [](const Eigen::VectorXd & input)
                                                  { return input(0) > 0; },
-                                                 limits, 0.05);
+                                                 limits, 0.05, 1);
                   });
   registerBuilder("deterministic_binary",
                   [](TiXmlNode * node)
@@ -57,7 +57,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     return new BenchmarkFunction("deterministic_binary",
                                                  [](const Eigen::VectorXd & input)
                                                  { return input(0) > 0; },
-                                                 limits, 0.0);
+                                                 limits, 0.0, 1);
                   });
   registerBuilder("ternary",
                   [](TiXmlNode * node)
@@ -67,8 +67,8 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     limits << - 3 , 3; 
                     return new BenchmarkFunction("ternary",
                                                  [](const Eigen::VectorXd & input)
-                                                 { return std::fabs(input(0)) > 1; },
-                                                 limits, 0.05);
+                                                 { return std::fabs(input(0)) < 1; },
+                                                 limits, 0.05, 1);
                   });
   registerBuilder("deterministic_ternary",
                   [](TiXmlNode * node)
@@ -78,8 +78,8 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                     limits << - 3 , 3; 
                     return new BenchmarkFunction("deterministic_ternary",
                                                  [](const Eigen::VectorXd & input)
-                                                 { return std::fabs(input(0)) > 1; },
-                                                 limits, 0.0);
+                                                 { return std::fabs(input(0)) < 1; },
+                                                 limits, 0.0, 1);
                   });
   registerBuilder("sinus_2dim",
                   [](TiXmlNode * node)
@@ -93,7 +93,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                                                    return sin(input(0))
                                                      + sin(input(1));
                                                  },
-                                                 limits, 0.01);
+                                                 limits, 0.01, 2);
                   });
   registerBuilder("binary_2dim",
                   [](TiXmlNode * node)
@@ -107,7 +107,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                                                    return input(0) > 0
                                                      && input(1) > 1;
                                                  },
-                                                 limits, 0.01);
+                                                 limits, 0.01, 1);
                   });
   registerBuilder("sinus_3dim",
                   [](TiXmlNode * node)
@@ -122,7 +122,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                                                      + sin(input(1))
                                                      + sin(input(2));
                                                  },
-                                                 limits, 0.01);
+                                                 limits, 0.01, 3);
                   });
   registerBuilder("binary_3dim",
                   [](TiXmlNode * node)
@@ -137,7 +137,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                                                      && input(1) > 0
                                                      && input(2) > 0;
                                                  },
-                                                 limits, 0.01);
+                                                 limits, 0.01, 1);
                   });
 }
 

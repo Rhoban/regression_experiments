@@ -49,7 +49,7 @@ for (i in 1:length(args))
     data <- aggregate(. ~ function_name+ solver + nb_samples, data, mean)
     print(data)
     plots <- list()
-    for (col in c("smse","learning_time","prediction_time")) {
+    for (col in c("squared_loss","squared_error","learning_time","compute_max_time")) {
         g <- ggplot(data, aes_string(x="nb_samples", y=col, group = "solver", color = "solver"))
         g <- g + facet_wrap(~function_name, nrow = 1, scales = "free")
         g <- g + geom_point(size = 5, shape='x')
@@ -58,6 +58,6 @@ for (i in 1:length(args))
         g <- g + scale_y_log10()
         plots <- c(plots,list(g))
     }
-    finalG <- arrangeGrob(grobs=plots,nrow=3)
+    finalG <- arrangeGrob(grobs=plots,nrow=4)
     ggsave(dst, finalG, width=16, height=9)
 }

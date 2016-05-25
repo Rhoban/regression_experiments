@@ -21,15 +21,15 @@ int main(int argc, char ** argv)
 {
   // Setting benchmark properties
   int nb_prediction_points = 200;
-  int nb_trials_per_type = 10;
+  int nb_trials_per_type = 20;
   // Maximal learning time in [ms]
   double max_learning_time = std::pow(10,5);
   // Maximal prediction time in [ms] (5ms per predicted point)
   double max_prediction_time = nb_prediction_points * 5;
 
   std::vector<int> nb_samples_vec;
-  for (int i = 1; i <= 4; i++) {
-    nb_samples_vec.push_back(25 * i);
+  for (int i = 1; i <= 8; i++) {
+    nb_samples_vec.push_back(25 * std::pow(2,i-1));
   }
   std::vector<std::string> function_names = {"abs",
                                              "sin",
@@ -38,23 +38,27 @@ int main(int argc, char ** argv)
                                              "deterministic_abs",
                                              "deterministic_sin",
                                              "deterministic_binary",
-                                             "deterministic_ternary"};
+                                             "deterministic_ternary",
+                                             "sinus_2dim",
+                                             "binary_2dim",
+                                             "sinus_3dim",
+                                             "binary_3dim"};
   std::map<std::string, std::shared_ptr<Solver>> solvers =
     {
-//      {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
-//      {"pwl_forest"    , std::shared_ptr<Solver>(new PWLForestSolver()                         )},
-//      {"gp_forest_sqrt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::SQRT))},
-//      {"gp_forest_curt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::CURT))},
-//      {"gp_forest_log2", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::LOG2))}
+      {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
+      {"pwl_forest"    , std::shared_ptr<Solver>(new PWLForestSolver()                         )},
+      {"gp_forest_sqrt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::SQRT))},
+      {"gp_forest_curt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::CURT))},
+      {"gp_forest_log2", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::LOG2))},
       {"gp"            , std::shared_ptr<Solver>(new GPSolver()                                )}
     };
 
   // replace for debug
-  function_names = {"sinus_2dim",
-                    "binary_2dim",
-                    "sinus_3dim",
-                    "binary_3dim"};
-  function_names = {"sin"};
+//  function_names = {"sinus_2dim",
+//                    "binary_2dim",
+//                    "sinus_3dim",
+//                    "binary_3dim"};
+//  function_names = {"sin", "sinus_2dim"};
 
   // Creating random engine
   auto engine = rosban_random::getRandomEngine();
@@ -76,8 +80,8 @@ int main(int argc, char ** argv)
   max_out << "function_name,"
           << "solver,"
           << "nb_samples,"
-          << "expected_max,"
-          << "value_at_arg_max,"
+          << "squared_loss,"
+          << "squared_error,"
           << "learning_time,"
           << "compute_max_time"
           << std::endl;
@@ -87,12 +91,14 @@ int main(int argc, char ** argv)
       const std::string & solver_name = solver_entry.first;
       std::shared_ptr<Solver> solver = solver_entry.second;
       for (int nb_samples : nb_samples_vec) {
+        std::cout << "Fitting '" << function_name << "' with '" << solver_name
+                  << " (" << nb_samples << " samples)" << std::endl;
         double total_prediction_time = 0;
         double total_learning_time   = 0;
         for (int trial = 0; trial < nb_trials_per_type; trial++) {
-          std::cerr << "trial: " << trial << "/" << nb_trials_per_type << std::endl;
+          std::cerr << "\ttrial: " << trial << "/" << nb_trials_per_type << std::endl;
           double smse, learning_time, prediction_time;
-          double expected_max, value_at_arg_max, compute_max_time;
+          double arg_max_loss, max_prediction_error, compute_max_time;
           runBenchmark(function_name,
                        nb_samples,
                        solver,
@@ -100,10 +106,13 @@ int main(int argc, char ** argv)
                        smse,
                        learning_time,
                        prediction_time,
-                       expected_max,
-                       value_at_arg_max,
+                       arg_max_loss,
+                       max_prediction_error,
                        compute_max_time,
                        &engine);
+          double loss2, error2;
+          loss2 = arg_max_loss * arg_max_loss;
+          error2 = max_prediction_error * max_prediction_error;
           out << function_name   << ","
               << solver_name     << ","
               << nb_samples      << ","
@@ -113,8 +122,8 @@ int main(int argc, char ** argv)
           max_out << function_name    << ","
                   << solver_name      << ","
                   << nb_samples       << ","
-                  << expected_max     << ","
-                  << value_at_arg_max << ","
+                  << loss2            << ","
+                  << error2           << ","
                   << learning_time    << ","
                   << compute_max_time << std::endl;
           // Cumulating time

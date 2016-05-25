@@ -85,8 +85,8 @@ void runBenchmark(const std::string & function_name,
                   double & smse,
                   double & learning_time_ms,
                   double & prediction_time_ms,
-                  double & expected_max,
-                  double & value_at_arg_max,
+                  double & arg_max_loss,
+                  double & max_prediction_error,
                   double & compute_max_time_ms,
                   std::default_random_engine * engine)
 {
@@ -98,8 +98,8 @@ void runBenchmark(const std::string & function_name,
                smse,
                learning_time_ms,
                prediction_time_ms,
-               expected_max,
-               value_at_arg_max,
+               arg_max_loss,
+               max_prediction_error,
                compute_max_time_ms,
                engine);
 }
@@ -111,8 +111,8 @@ void runBenchmark(const std::string & function_name,
                   double & smse,
                   double & learning_time_ms,
                   double & prediction_time_ms,
-                  double & expected_max,
-                  double & value_at_arg_max,
+                  double & arg_max_loss,
+                  double & max_prediction_error,
                   double & compute_max_time_ms,
                   std::default_random_engine * engine)
 {
@@ -152,15 +152,19 @@ void runBenchmark(const std::string & function_name,
 
   // Computing max
   Eigen::VectorXd best_input;
+  double expected_max, measured_max;
   TimeStamp get_max_start = TimeStamp::now();
   solver->getMaximum(benchmark_function->limits, best_input, expected_max);
   TimeStamp get_max_end = TimeStamp::now();
-  int nb_max_tests = 100;
-  value_at_arg_max = 0;
+  int nb_max_tests = 1000;
+  measured_max = 0;
   for (int i = 0; i < nb_max_tests; i++) {
-    value_at_arg_max += benchmark_function->f(best_input);
+    measured_max += benchmark_function->f(best_input);
   }
-  value_at_arg_max /= nb_max_tests;
+  measured_max /= nb_max_tests;
+
+  arg_max_loss = benchmark_function->function_max - measured_max;
+  max_prediction_error = std::fabs(expected_max - measured_max);
 
   // Computing output values
   smse = rosban_gp::computeSMSE(test_observations, prediction_means);

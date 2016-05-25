@@ -29,11 +29,11 @@ public:
                      const Eigen::MatrixXd & limits) override;
 
   /// Predict the outputs independently using internal structure
-  virtual void predict(const Eigen::MatrixXd inputs,
+  virtual void predict(const Eigen::MatrixXd & inputs,
                        Eigen::VectorXd & means,
                        Eigen::VectorXd & vars) override;
 
-  virtual void gradients(const Eigen::MatrixXd inputs,
+  virtual void gradients(const Eigen::MatrixXd & inputs,
                          Eigen::MatrixXd & gradients) override;
 
   virtual void getMaximum(const Eigen::MatrixXd & limits,

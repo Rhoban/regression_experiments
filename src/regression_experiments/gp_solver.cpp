@@ -28,7 +28,7 @@ void GPSolver::solve(const Eigen::MatrixXd & inputs,
   gp.updateInternal();
 }
 
-void GPSolver::predict(const Eigen::MatrixXd inputs,
+void GPSolver::predict(const Eigen::MatrixXd & inputs,
                        Eigen::VectorXd & means,
                        Eigen::VectorXd & vars)
 {
@@ -43,7 +43,7 @@ void GPSolver::predict(const Eigen::MatrixXd inputs,
     vars(point) = var;
   }
 }
-void GPSolver::gradients(const Eigen::MatrixXd inputs,
+void GPSolver::gradients(const Eigen::MatrixXd & inputs,
                          Eigen::MatrixXd & gradients)
 {
   gradients = Eigen::MatrixXd::Zero(inputs.rows(), inputs.cols());
