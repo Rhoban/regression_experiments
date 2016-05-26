@@ -5,6 +5,7 @@ set(SOURCES
   pwc_forest_solver.cpp
   pwl_forest_solver.cpp
   gp_solver.cpp
+  multi_dimensional_solver.cpp
   solver_factory.cpp
   tools.cpp
 )
