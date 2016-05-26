@@ -21,7 +21,7 @@ int main(int argc, char ** argv)
 {
   // Setting benchmark properties
   int nb_prediction_points = 200;
-  int nb_trials_per_type = 20;
+  int nb_trials_per_type = 10;
   // Maximal learning time in [ms]
   double max_learning_time = std::pow(10,5);
   // Maximal prediction time in [ms] (5ms per predicted point)
@@ -31,18 +31,21 @@ int main(int argc, char ** argv)
   for (int i = 1; i <= 8; i++) {
     nb_samples_vec.push_back(25 * std::pow(2,i-1));
   }
-  std::vector<std::string> function_names = {"abs",
-                                             "sin",
-                                             "binary",
-                                             "ternary",
-                                             "deterministic_abs",
-                                             "deterministic_sin",
-                                             "deterministic_binary",
-                                             "deterministic_ternary",
-                                             "sinus_2dim",
-                                             "binary_2dim",
-                                             "sinus_3dim",
-                                             "binary_3dim"};
+  std::vector<std::string> function_names =
+    {
+//      "abs",
+//      "sin",
+//      "binary",
+//      "ternary",
+//      "deterministic_abs",
+//      "deterministic_sin",
+//      "deterministic_binary",
+//      "deterministic_ternary",
+      "sinus_2dim",
+      "binary_2dim",
+      "sinus_3dim",
+      "binary_3dim"
+    };
   std::map<std::string, std::shared_ptr<Solver>> solvers =
     {
       {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
@@ -92,10 +95,10 @@ int main(int argc, char ** argv)
       std::shared_ptr<Solver> solver = solver_entry.second;
       for (int nb_samples : nb_samples_vec) {
         std::cout << "Fitting '" << function_name << "' with '" << solver_name
-                  << " (" << nb_samples << " samples)" << std::endl;
+                  << "' (" << nb_samples << " samples)" << std::endl;
         double total_prediction_time = 0;
         double total_learning_time   = 0;
-        for (int trial = 0; trial < nb_trials_per_type; trial++) {
+        for (int trial = 1; trial <= nb_trials_per_type; trial++) {
           std::cerr << "\ttrial: " << trial << "/" << nb_trials_per_type << std::endl;
           double smse, learning_time, prediction_time;
           double arg_max_loss, max_prediction_error, compute_max_time;

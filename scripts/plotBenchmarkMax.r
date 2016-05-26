@@ -55,7 +55,7 @@ for (i in 1:length(args))
         g <- g + geom_point(size = 5, shape='x')
         g <- g + geom_line(size = 0.5)
         g <- g + scale_x_log10(breaks=c(25,100,400,1600))
-        g <- g + scale_y_log10()
+        g <- g + scale_y_log10()#sometimes getting problems with squared_loss = 0
         plots <- c(plots,list(g))
     }
     finalG <- arrangeGrob(grobs=plots,nrow=4)

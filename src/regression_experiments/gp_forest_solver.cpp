@@ -116,7 +116,7 @@ void GPForestSolver::getMaximum(const Eigen::MatrixXd & limits,
   // rProp properties
   int nb_trials = 25;
   double epsilon = std::pow(10, -6);
-  int max_nb_guess = 1000;
+  int max_nb_guess = 10000;
   // Creating random initial guesses and random initial steps
   Eigen::MatrixXd initial_guesses;
   Eigen::MatrixXd initial_steps;
