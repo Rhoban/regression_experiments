@@ -6,6 +6,8 @@
 
 #include "rosban_random/tools.h"
 
+#include <iostream>
+
 using rosban_gp::CovarianceFunction;
 using rosban_gp::GaussianProcess;
 using rosban_gp::SquaredExponential;
@@ -19,12 +21,16 @@ void GPSolver::solve(const Eigen::MatrixXd & inputs,
 {
   (void) limits;
   // Creating GP
-  std::unique_ptr<CovarianceFunction> cov_func(new SquaredExponential());
+  std::unique_ptr<CovarianceFunction> cov_func(new SquaredExponential(inputs.rows()));
   gp = GaussianProcess(inputs, observations, std::move(cov_func));
-  // Run gradient optimization
-  double epsilon = std::pow(10,-6);
-  rosban_gp::rProp(gp, gp.getParametersGuess(), gp.getParametersStep(),
-                   gp.getParametersLimits(), epsilon);
+  // rProp properties
+  int nb_trials = 10;
+  double epsilon = std::pow(10, -6);
+  int max_nb_guess = 500;
+  // Get random initial guesses and steps
+  Eigen::VectorXd best_guess;
+  best_guess = randomizedRProp(gp, gp.getParametersLimits(), epsilon, nb_trials, max_nb_guess);
+  gp.setParameters(best_guess);
   gp.updateInternal();
 }
 
@@ -56,39 +62,30 @@ void GPSolver::getMaximum(const Eigen::MatrixXd & limits,
                           Eigen::VectorXd & input, double & output)
 {
   // rProp properties
-  int nb_trials = 25;
+  int nb_trials = 100;
   double epsilon = std::pow(10, -6);
-  int max_nb_guess = 1000;
-  // Creating random initial guesses and random initial steps
-  Eigen::MatrixXd initial_guesses;
-  Eigen::MatrixXd initial_steps;
-  initial_guesses = rosban_random::getUniformSamplesMatrix(limits, nb_trials);
-  initial_steps   = rosban_random::getUniformSamplesMatrix(limits, nb_trials);
-  // Preparing common data
+  int max_nb_guess = 2000;
+  // Preparing functions
   std::function<Eigen::VectorXd(const Eigen::VectorXd)> gradient_func;
   gradient_func = [this](const Eigen::VectorXd & guess)
     {
-      return this->gp.getGradient(guess);
+      Eigen::MatrixXd gradient;
+      this->gradients(guess, gradient);
+      return Eigen::VectorXd(gradient.col(0));
     };
-  double best_value = std::numeric_limits<double>::lowest();
-  Eigen::VectorXd best_guess = (limits.col(0) + limits.col(1)) / 2;
-  // Running several rProp optimization with different starting points
-  for (int trial = 0; trial < nb_trials; trial++) {
-    Eigen::VectorXd current_guess;
-    current_guess = rosban_gp::rProp(gradient_func,
-                                     initial_guesses.col(trial),
-                                     initial_steps.col(trial),
-                                     limits,
-                                     epsilon,
-                                     max_nb_guess);
-    double value = gp.getPrediction(current_guess);
-    if (value > best_value) {
-      best_value = value;
-      best_guess = current_guess;
-    }
-  }
+  std::function<double(const Eigen::VectorXd)> scoring_func;
+  scoring_func = [this](const Eigen::VectorXd & guess)
+    {
+      Eigen::VectorXd values, vars;
+      this->predict(guess, values, vars);
+      return values(0);
+    };
+  // Performing multiple rProp and conserving the best candidate
+  Eigen::VectorXd best_guess;
+  best_guess = rosban_gp::randomizedRProp(gradient_func, scoring_func, limits,
+                                          epsilon, nb_trials, max_nb_guess);
   input = best_guess;
-  output = best_value;
+  output = scoring_func(best_guess);
 }
 
 }

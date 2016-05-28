@@ -10,7 +10,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                   {
                     (void)node;
                     Eigen::MatrixXd limits(1,2);
-                    limits << - 4 * M_PI, 4 * M_PI; 
+                    limits << - M_PI, M_PI; 
                     return new BenchmarkFunction("sin", &sin, limits, 0.05, 1);
                   });
   registerBuilder("deterministic_sin",
@@ -18,7 +18,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                   {
                     (void)node;
                     Eigen::MatrixXd limits(1,2);
-                    limits << - 4 * M_PI, 4 * M_PI; 
+                    limits << - M_PI, M_PI; 
                     return new BenchmarkFunction("deterministic_sin", &sin, limits, 0.0, 1);
                   });
   registerBuilder("abs",
@@ -86,7 +86,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                   {
                     (void)node;
                     Eigen::MatrixXd limits(2,2);
-                    limits << -4*M_PI , 4*M_PI, -4*M_PI , 4*M_PI; 
+                    limits << -M_PI , M_PI, -M_PI , M_PI; 
                     return new BenchmarkFunction("sinus_2dim",
                                                  [](const Eigen::VectorXd & input)
                                                  { 
@@ -114,7 +114,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                   {
                     (void)node;
                     Eigen::MatrixXd limits(3,2);
-                    limits << -4*M_PI , 4*M_PI, -4*M_PI , 4*M_PI, -4*M_PI , 4*M_PI; 
+                    limits << -M_PI , M_PI, -M_PI , M_PI, -M_PI , M_PI; 
                     return new BenchmarkFunction("sinus_3dim",
                                                  [](const Eigen::VectorXd & input)
                                                  { 
@@ -129,7 +129,7 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
                   {
                     (void)node;
                     Eigen::MatrixXd limits(3,2);
-                    limits << -3 , 3, -3 , 3, -3 , 3; 
+                    limits << -1 , 1, -1 , 1, -1 , 1; 
                     return new BenchmarkFunction("binary_3dim",
                                                  [](const Eigen::VectorXd & input)
                                                  { 

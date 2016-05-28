@@ -24,7 +24,7 @@ int main(int argc, char ** argv)
   int nb_trials_per_type = 10;
   // Maximal learning time in [ms]
   double max_learning_time = std::pow(10,5);
-  // Maximal prediction time in [ms] (5ms per predicted point)
+  // Maximal prediction time in [ms] (10ms per predicted point)
   double max_prediction_time = nb_prediction_points * 5;
 
   std::vector<int> nb_samples_vec;
@@ -42,9 +42,9 @@ int main(int argc, char ** argv)
 //      "deterministic_binary",
 //      "deterministic_ternary",
       "sinus_2dim",
-      "binary_2dim",
-      "sinus_3dim",
-      "binary_3dim"
+//      "binary_2dim",
+      "sinus_3dim"
+//      "binary_3dim"
     };
   std::map<std::string, std::shared_ptr<Solver>> solvers =
     {
