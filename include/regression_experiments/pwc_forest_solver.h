@@ -31,6 +31,10 @@ public:
   virtual void getMaximum(const Eigen::MatrixXd & limits,
                           Eigen::VectorXd & input, double & output) override;
 
+  virtual std::string class_name() const override;
+  virtual void to_xml(std::ostream &out) const override;
+  virtual void from_xml(TiXmlNode *node) override;
+
 private:
   std::unique_ptr<regression_forests::Forest> forest;
 };

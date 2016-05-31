@@ -20,18 +20,9 @@ void GPSolver::solve(const Eigen::MatrixXd & inputs,
                      const Eigen::MatrixXd & limits)
 {
   (void) limits;
-  // Creating GP
   std::unique_ptr<CovarianceFunction> cov_func(new SquaredExponential(inputs.rows()));
   gp = GaussianProcess(inputs, observations, std::move(cov_func));
-  // rProp properties
-  int nb_trials = 10;
-  double epsilon = std::pow(10, -6);
-  int max_nb_guess = 500;
-  // Get random initial guesses and steps
-  Eigen::VectorXd best_guess;
-  best_guess = randomizedRProp(gp, gp.getParametersLimits(), epsilon, nb_trials, max_nb_guess);
-  gp.setParameters(best_guess);
-  gp.updateInternal();
+  gp.autoTune(conf);
 }
 
 void GPSolver::predict(const Eigen::MatrixXd & inputs,
@@ -86,6 +77,21 @@ void GPSolver::getMaximum(const Eigen::MatrixXd & limits,
                                           epsilon, nb_trials, max_nb_guess);
   input = best_guess;
   output = scoring_func(best_guess);
+}
+
+std::string GPSolver::class_name() const
+{
+  return "gp_solver";
+}
+
+void GPSolver::to_xml(std::ostream &out) const
+{
+  conf.write("conf", out);
+}
+
+void GPSolver::from_xml(TiXmlNode *node)
+{
+  conf.read(node, "conf");
 }
 
 }

@@ -3,6 +3,8 @@
 #include "regression_experiments/solver.h"
 
 #include "rosban_gp/core/gaussian_process.h"
+#include "rosban_gp/gradient_ascent/randomized_rprop.h"
+
 
 #include <Eigen/Core>
 
@@ -31,8 +33,13 @@ public:
   virtual void getMaximum(const Eigen::MatrixXd & limits,
                           Eigen::VectorXd & input, double & output) override;
 
+  virtual std::string class_name() const override;
+  virtual void to_xml(std::ostream &out) const override;
+  virtual void from_xml(TiXmlNode *node) override;
+
 private:
   rosban_gp::GaussianProcess gp;
+  rosban_gp::RandomizedRProp::Config conf;
 };
 
 }

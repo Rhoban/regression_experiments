@@ -13,8 +13,9 @@ SolverFactory::SolverFactory()
   registerBuilder("gp_forest",
                   [](TiXmlNode * node)
                   {
-                    (void)node;
-                    return new GPForestSolver();
+                    Solver * solver = new GPForestSolver();
+                    solver->from_xml(node);
+                    return solver;
                   });
   registerBuilder("pwc_forest",
                   [](TiXmlNode * node)

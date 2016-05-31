@@ -63,4 +63,17 @@ void PWLForestSolver::getMaximum(const Eigen::MatrixXd & limits,
   output = max_pair.first;
 }
 
+std::string PWLForestSolver::class_name() const
+{
+  return "pwl_forest_solver";
+}
+
+void PWLForestSolver::to_xml(std::ostream &out) const
+{
+}
+
+void PWLForestSolver::from_xml(TiXmlNode *node)
+{
+}
+
 }

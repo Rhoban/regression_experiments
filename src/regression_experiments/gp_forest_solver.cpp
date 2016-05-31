@@ -140,6 +140,19 @@ void GPForestSolver::getMaximum(const Eigen::MatrixXd & limits,
   output = scoring_func(best_guess);
 }
 
+std::string GPForestSolver::class_name() const
+{
+  return "gp_forest_solver";
+}
+
+void GPForestSolver::to_xml(std::ostream &out) const
+{
+}
+
+void GPForestSolver::from_xml(TiXmlNode *node)
+{
+}
+
 GPForestSolver::Type loadType(const std::string &s)
 {
   if (s == "SQRT") return GPForestSolver::Type::SQRT;

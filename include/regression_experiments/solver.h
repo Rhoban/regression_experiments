@@ -1,11 +1,13 @@
 #pragma once
 
+#include "rosban_utils/serializable.h"
+
 #include <Eigen/Core>
 
 namespace regression_experiments
 {
 
-class Solver
+class Solver : public rosban_utils::Serializable
 {
 public:
 
