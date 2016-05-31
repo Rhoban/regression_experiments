@@ -1,8 +1,5 @@
 #include "regression_experiments/benchmark_function_factory.h"
-#include "regression_experiments/gp_solver.h"
-#include "regression_experiments/gp_forest_solver.h"
-#include "regression_experiments/pwc_forest_solver.h"
-#include "regression_experiments/pwl_forest_solver.h"
+#include "regression_experiments/solver_factory.h"
 #include "regression_experiments/tools.h"
 
 #include "rosban_regression_forests/algorithms/extra_trees.h"
@@ -17,8 +14,38 @@ using namespace regression_experiments;
 
 using rosban_gp::GaussianProcess;
 
-int main(int argc, char ** argv)
+class BenchmarkConfig : public rosban_utils::Serializable
 {
+public:
+  std::map<std::string, std::shared_ptr<Solver>> solvers;
+  //TODO add other informations
+  
+
+  std::string class_name() const override
+    {
+      return "benchmark_config";
+    }
+
+  void to_xml(std::ostream &out) const override
+    {
+      throw std::logic_error("BenchmarkConfig::to_xml: Not implemented");
+    }
+
+  void from_xml(TiXmlNode *node)
+    {
+      // Read solvers
+      SolverFactory sf;
+      std::function<std::shared_ptr<Solver>(TiXmlNode*)> value_builder;
+      value_builder = [&sf](TiXmlNode * node) { return std::shared_ptr<Solver>(sf.build(node)); };
+      solvers = rosban_utils::xml_tools::read_map(node, "solvers", value_builder);
+    }
+};
+
+int main()
+{
+  BenchmarkConfig conf;
+  conf.load_file();
+
   // Setting benchmark properties
   int nb_prediction_points = 200;
   int nb_trials_per_type = 10;
@@ -46,15 +73,15 @@ int main(int argc, char ** argv)
       "sinus_3dim"
 //      "binary_3dim"
     };
-  std::map<std::string, std::shared_ptr<Solver>> solvers =
-    {
-      {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
-      {"pwl_forest"    , std::shared_ptr<Solver>(new PWLForestSolver()                         )},
-      {"gp_forest_sqrt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::SQRT))},
-      {"gp_forest_curt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::CURT))},
-      {"gp_forest_log2", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::LOG2))},
-      {"gp"            , std::shared_ptr<Solver>(new GPSolver()                                )}
-    };
+//  std::map<std::string, std::shared_ptr<Solver>> solvers =
+//    {
+//      {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
+//      {"pwl_forest"    , std::shared_ptr<Solver>(new PWLForestSolver()                         )},
+//      {"gp_forest_sqrt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::SQRT))},
+//      {"gp_forest_curt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::CURT))},
+//      {"gp_forest_log2", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::LOG2))},
+//      {"gp"            , std::shared_ptr<Solver>(new GPSolver()                                )}
+//    };
 
   // replace for debug
 //  function_names = {"sinus_2dim",
@@ -90,7 +117,7 @@ int main(int argc, char ** argv)
           << std::endl;
 
   for (const std::string & function_name : function_names) {
-    for (auto & solver_entry : solvers) {
+    for (auto & solver_entry : conf.solvers) {
       const std::string & solver_name = solver_entry.first;
       std::shared_ptr<Solver> solver = solver_entry.second;
       for (int nb_samples : nb_samples_vec) {

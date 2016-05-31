@@ -91,7 +91,7 @@ void GPSolver::to_xml(std::ostream &out) const
 
 void GPSolver::from_xml(TiXmlNode *node)
 {
-  conf.read(node, "conf");
+  conf.tryRead(node, "conf");
 }
 
 }

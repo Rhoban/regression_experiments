@@ -32,8 +32,9 @@ SolverFactory::SolverFactory()
   registerBuilder("gp",
                   [](TiXmlNode * node)
                   {
-                    (void)node;
-                    return new GPSolver();
+                    Solver * solver = new GPSolver();
+                    solver->from_xml(node);
+                    return solver;
                   });
 }
 
