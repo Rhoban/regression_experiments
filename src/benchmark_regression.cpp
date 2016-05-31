@@ -28,6 +28,7 @@ public:
 
   void to_xml(std::ostream &out) const override
     {
+      (void) out;
       throw std::logic_error("BenchmarkConfig::to_xml: Not implemented");
     }
 

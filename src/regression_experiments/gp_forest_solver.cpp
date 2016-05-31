@@ -8,6 +8,8 @@
 #include "rosban_gp/tools.h"
 #include "rosban_gp/core/gaussian_process.h"
 
+#include "rosban_utils/serializable.h"
+
 #include "rosban_random/tools.h"
 
 using regression_forests::ApproximationType;
@@ -24,7 +26,7 @@ namespace regression_experiments
 {
 
 GPForestSolver::GPForestSolver(Type t)
-  : type(t)
+  : type(t), nb_threads(1)
 {
 }
 GPForestSolver::~GPForestSolver() {}
@@ -34,6 +36,7 @@ void GPForestSolver::solve(const Eigen::MatrixXd & inputs,
                            const Eigen::MatrixXd & limits)
 {
   int nb_samples = observations.rows();
+
   ExtraTrees solver;
   solver.conf =  ExtraTrees::Config::generateAuto(limits, nb_samples,
                                                   ApproximationType::GP);
@@ -51,10 +54,18 @@ void GPForestSolver::solve(const Eigen::MatrixXd & inputs,
       solver.conf.n_min = std::log2(nb_samples);
       break;
   }
+  solver.conf.nb_threads = nb_threads;
 
   TrainingSet ts(inputs, observations);
 
+  // save and replace config
+  rosban_gp::RandomizedRProp::Config tmp_config;
+  tmp_config = regression_forests::GPApproximation::approximation_config;
+  regression_forests::GPApproximation::approximation_config = approximation_conf;
+  // Solve problem
   forest = solver.solve(ts, limits);
+  // restore config
+  regression_forests::GPApproximation::approximation_config = tmp_config;
 }
 
 void GPForestSolver::predict(const Eigen::MatrixXd & inputs,
@@ -113,10 +124,6 @@ void GPForestSolver::gradients(const Eigen::MatrixXd & inputs,
 void GPForestSolver::getMaximum(const Eigen::MatrixXd & limits,
                                 Eigen::VectorXd & input, double & output)
 {
-  // rProp properties
-  int nb_trials = 100;
-  double epsilon = std::pow(10, -6);
-  int max_nb_guess = 2000;
   // Preparing functions
   std::function<Eigen::VectorXd(const Eigen::VectorXd)> gradient_func;
   gradient_func = [this](const Eigen::VectorXd & guess)
@@ -134,8 +141,8 @@ void GPForestSolver::getMaximum(const Eigen::MatrixXd & limits,
     };
   // Performing multiple rProp and conserving the best candidate
   Eigen::VectorXd best_guess;
-  best_guess = rosban_gp::randomizedRProp(gradient_func, scoring_func, limits,
-                                          epsilon, nb_trials, max_nb_guess);
+  best_guess = rosban_gp::RandomizedRProp::run(gradient_func, scoring_func, limits,
+                                               find_max_conf);
   input = best_guess;
   output = scoring_func(best_guess);
 }
@@ -147,10 +154,20 @@ std::string GPForestSolver::class_name() const
 
 void GPForestSolver::to_xml(std::ostream &out) const
 {
+  rosban_utils::xml_tools::write<std::string>("type", to_string(type), out);
+  rosban_utils::xml_tools::write<int>("nb_threads", nb_threads, out);
+  approximation_conf.write("approximation_conf", out);
+  find_max_conf.write("find_max_conf", out);
 }
 
 void GPForestSolver::from_xml(TiXmlNode *node)
 {
+  std::string type_str;
+  rosban_utils::xml_tools::try_read<std::string>(node, "type", type_str);
+  if (type_str.size() != 0) type = loadType(type_str);
+  rosban_utils::xml_tools::try_read<int>(node, "nb_threads", nb_threads);
+  approximation_conf.tryRead(node, "approximation_conf");
+  find_max_conf.tryRead(node, "find_max_conf");
 }
 
 GPForestSolver::Type loadType(const std::string &s)

@@ -11,7 +11,7 @@ using namespace regression_experiments;
 
 using rosban_gp::GaussianProcess;
 
-int main(int argc, char ** argv)
+int main()
 {
   // Setting problem properties
   int nb_samples = 50;

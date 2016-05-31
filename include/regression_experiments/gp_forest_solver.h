@@ -4,6 +4,8 @@
 
 #include "rosban_regression_forests/core/forest.h"
 
+#include "rosban_gp/gradient_ascent/randomized_rprop.h"
+
 #include <Eigen/Core>
 
 namespace regression_experiments
@@ -19,7 +21,7 @@ public:
   enum class Type
   { SQRT, CURT, LOG2};
 
-  GPForestSolver(Type t = Type::SQRT);
+  GPForestSolver(Type t = Type::LOG2);
 
   virtual ~GPForestSolver();
 
@@ -46,6 +48,10 @@ public:
 private:
   std::unique_ptr<regression_forests::Forest> forest;
   Type type;
+  int nb_threads;
+
+  rosban_gp::RandomizedRProp::Config approximation_conf;
+  rosban_gp::RandomizedRProp::Config find_max_conf;
 };
 GPForestSolver::Type loadType(const std::string &s);
 std::string to_string(GPForestSolver::Type type);
