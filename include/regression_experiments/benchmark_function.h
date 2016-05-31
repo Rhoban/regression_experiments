@@ -3,6 +3,7 @@
 #include <Eigen/Core>
 
 #include <functional>
+#include <random>
 
 namespace regression_experiments
 {
