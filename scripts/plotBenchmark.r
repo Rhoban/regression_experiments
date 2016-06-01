@@ -1,6 +1,8 @@
 library(ggplot2)
 library(gridExtra)
 library(stringr)
+library(Rmisc)
+
 
 getBase <- function(path)
 {
@@ -46,14 +48,20 @@ for (i in 1:length(args))
     filePrefix <- getFilePrefix(path)
     dst <- sprintf("%s%s.png", base, filePrefix)
     data <- read.csv(path)
-    data <- aggregate(. ~ function_name+ solver + nb_samples, data, mean)
-    print(data)
     plots <- list()
     for (col in c("smse","learning_time","prediction_time")) {
-        g <- ggplot(data, aes_string(x="nb_samples", y=col, group = "solver", color = "solver"))
+        internalData <- summarySE(data, measurevar=col, groupvars = c("function_name",
+                                                                      "solver",
+                                                                      "nb_samples"))
+        print(internalData)
+        g <- ggplot(internalData, aes_string(x="nb_samples", y=col,
+                                     ymin=sprintf("%s-se",col),
+                                     ymax=sprintf("%s+se",col),
+                                     group = "solver", color = "solver"))
         g <- g + facet_wrap(~function_name, nrow = 1, scales = "free")
         g <- g + geom_point(size = 5, shape='x')
         g <- g + geom_line(size = 0.5)
+        g <- g + geom_errorbar(color="black", width=0.01)
         g <- g + scale_x_log10(breaks=25 * 2 ** seq(1,16))
         g <- g + scale_y_log10()
         plots <- c(plots,list(g))

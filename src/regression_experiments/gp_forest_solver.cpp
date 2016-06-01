@@ -112,7 +112,9 @@ void GPForestSolver::gradients(const Eigen::MatrixXd & inputs,
         throw std::runtime_error("Found an approximation which is not a gaussian process");
       }
       double var = gp_approximation->gp.getVariance(input);
-      if (var == 0) throw std::runtime_error("GPForestSolver::gradients: var == 0");
+      if (var == 0) {
+        var = std::pow(10,-20);//Avoiding to get a value of 0 for var
+      }
       double weight = 1.0 / var;
       grad += gp_approximation->gp.getGradient(input) * weight;
       total_weight += weight;
