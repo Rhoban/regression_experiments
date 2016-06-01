@@ -71,9 +71,9 @@ void buildPrediction(const std::string & function_name,
   benchmark_function->getUniformSamples(nb_samples, samples_inputs, samples_outputs, &engine);
   // Solving
   std::unique_ptr<Solver> solver(SolverFactory().build(solver_name));
-  solver->solve(samples_inputs, samples_outputs, benchmark_function->limits);
+  solver->solve(samples_inputs, samples_outputs, benchmark_function->getLimits());
   // Predicting
-  prediction_points = discretizeSpace(benchmark_function->limits, points_by_dim);
+  prediction_points = discretizeSpace(benchmark_function->getLimits(), points_by_dim);
   solver->predict(prediction_points, prediction_means, prediction_vars);
   solver->gradients(prediction_points, gradients);
 }
@@ -91,7 +91,9 @@ void runBenchmark(const std::string & function_name,
                   std::default_random_engine * engine)
 {
   std::shared_ptr<Solver> solver(SolverFactory().build(solver_name));
-  runBenchmark(function_name,
+  BenchmarkFunctionFactory bff;
+  std::shared_ptr<BenchmarkFunction> function(bff.build(function_name));
+  runBenchmark(function,
                nb_samples,
                solver,
                nb_test_points,
@@ -104,7 +106,7 @@ void runBenchmark(const std::string & function_name,
                engine);
 }
 
-void runBenchmark(const std::string & function_name,
+void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
                   int nb_samples,
                   std::shared_ptr<Solver> solver,
                   int nb_test_points,
@@ -128,17 +130,12 @@ void runBenchmark(const std::string & function_name,
     engine = rosban_random::newRandomEngine();
     clean_engine = true;
   }
-  // Building function
-  BenchmarkFunctionFactory bff;
-  std::unique_ptr<BenchmarkFunction> benchmark_function(bff.build(function_name));
   // Generating samples and test points
-  benchmark_function->getUniformSamples(nb_samples, samples_inputs, samples_outputs,
-                                        engine);
-  benchmark_function->getUniformSamples(nb_test_points, test_points, test_observations,
-                                        engine);
+  function->getUniformSamples(nb_samples, samples_inputs, samples_outputs, engine);
+  function->getUniformSamples(nb_test_points, test_points, test_observations, engine);
   // Solving
   TimeStamp learning_start = TimeStamp::now();
-  solver->solve(samples_inputs, samples_outputs, benchmark_function->limits);
+  solver->solve(samples_inputs, samples_outputs, function->getLimits());
   TimeStamp learning_end = TimeStamp::now();
   // Getting predictions for test points
   TimeStamp prediction_start = TimeStamp::now();
@@ -154,17 +151,24 @@ void runBenchmark(const std::string & function_name,
   Eigen::VectorXd best_input;
   double expected_max, measured_max;
   TimeStamp get_max_start = TimeStamp::now();
-  solver->getMaximum(benchmark_function->limits, best_input, expected_max);
+  solver->getMaximum(function->getLimits(), best_input, expected_max);
   TimeStamp get_max_end = TimeStamp::now();
   int nb_max_tests = 1000;
   measured_max = 0;
   for (int i = 0; i < nb_max_tests; i++) {
-    measured_max += benchmark_function->f(best_input);
+    measured_max += function->sample(best_input);
   }
   measured_max /= nb_max_tests;
 
-  arg_max_loss = benchmark_function->function_max - measured_max;
-  max_prediction_error = std::fabs(expected_max - measured_max);
+  try{
+    arg_max_loss = function->getMax() - measured_max;
+    max_prediction_error = std::fabs(expected_max - measured_max);
+  }
+  catch(const std::runtime_error & exc) {
+    arg_max_loss = -1;
+    max_prediction_error = -1;
+    std::cerr << exc.what() << std::endl;
+  }
 
   // Computing output values
   smse = rosban_gp::computeSMSE(test_observations, prediction_means);

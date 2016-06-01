@@ -1,5 +1,6 @@
 #pragma once
 
+#include "regression_experiments/benchmark_function.h"
 #include "regression_experiments/solver.h"
 
 #include <Eigen/Core>
@@ -43,7 +44,7 @@ void runBenchmark(const std::string & function_name,
                   double & compute_max_time_ms,
                   std::default_random_engine * engine);
 
-void runBenchmark(const std::string & function_name,
+void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
                   int nb_samples,
                   std::shared_ptr<Solver> solver,
                   int nb_test_points,

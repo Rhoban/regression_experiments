@@ -54,7 +54,7 @@ for (i in 1:length(args))
         g <- g + facet_wrap(~function_name, nrow = 1, scales = "free")
         g <- g + geom_point(size = 5, shape='x')
         g <- g + geom_line(size = 0.5)
-        g <- g + scale_x_log10(breaks=c(25,100,400,1600))
+        g <- g + scale_x_log10(breaks=25 * 2 ** seq(1,16))
         g <- g + scale_y_log10()
         plots <- c(plots,list(g))
     }

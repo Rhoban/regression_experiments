@@ -1,36 +1,28 @@
 #pragma once
 
+#include "rosban_utils/serializable.h"
+
 #include <Eigen/Core>
 
-#include <functional>
 #include <random>
 
 namespace regression_experiments
 {
 
-class BenchmarkFunction
+class BenchmarkFunction : public rosban_utils::Serializable
 {
 public:
-  typedef std::function<double(const Eigen::VectorXd &)> EvaluationFunction;
 
-  std::string name;
-  EvaluationFunction f;
-  Eigen::MatrixXd limits;
-  double observation_noise;
-  /// max_{i \in limits}E(f(i))
-  double function_max;
+  BenchmarkFunction(double observation_noise = 0);
 
-  BenchmarkFunction(const std::string & name,
-                    EvaluationFunction f,
-                    const Eigen::MatrixXd limits,
-                    double observation_noise,
-                    double function_max);
-  /// Easy binding for one dimensional functions
-  BenchmarkFunction(const std::string & name,
-                    std::function<double(double)> f,
-                    const Eigen::MatrixXd limits,
-                    double observation_noise,
-                    double function_max);
+  /// Return the limits for the inputs parameters
+  virtual Eigen::MatrixXd getLimits() = 0;
+
+  /// Return the value at given input without any noise observation
+  virtual double sample(const Eigen::VectorXd & input) = 0;
+
+  /// Return the maximal value of the function, throw a runtime_error if it is not overriden
+  virtual double getMax();
 
   /// Create samples and place them in the provided arguments
   /// Use engine if provided, otherwise, it creates its own engine
@@ -39,6 +31,12 @@ public:
                          Eigen::VectorXd & observations,
                          std::default_random_engine * engine = NULL,
                          bool apply_noise = true);
+
+  virtual void to_xml(std::ostream &out) const override;
+  virtual void from_xml(TiXmlNode *node) override;
+
+protected:
+  double observation_noise;
 
 };
 

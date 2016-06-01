@@ -4,29 +4,19 @@
 
 #include "rosban_random/tools.h"
 
+#include <functional>
+
 namespace regression_experiments
 {
 
-BenchmarkFunction::BenchmarkFunction(const std::string & name_,
-                                     EvaluationFunction f_,
-                                     const Eigen::MatrixXd limits_,
-                                     double observation_noise_,
-                                     double function_max_)
-  : name(name_), f(f_), limits(limits_), observation_noise(observation_noise_),
-    function_max(function_max_)
+BenchmarkFunction::BenchmarkFunction(double observation_noise_)
+  : observation_noise(observation_noise_)
 {}
 
-BenchmarkFunction::BenchmarkFunction(const std::string & name_,
-                                     std::function<double(double)> f,
-                                     const Eigen::MatrixXd limits_,
-                                     double observation_noise_,
-                                     double function_max_)
-  : BenchmarkFunction(name_,
-                      [f](const Eigen::VectorXd & input) { return f(input(0)); },
-                      limits_,
-                      observation_noise_,
-                      function_max_)
-{}
+double BenchmarkFunction::getMax()
+{
+  throw std::runtime_error("Unimplemented getMax for given function");
+}
 
 void BenchmarkFunction::getUniformSamples(int nb_samples,
                                           Eigen::MatrixXd & samples,
@@ -42,7 +32,9 @@ void BenchmarkFunction::getUniformSamples(int nb_samples,
     cleanup = true;
   }
   // Generating inputs and outputs
-  samples = rosban_random::getUniformSamplesMatrix(limits, nb_samples, engine);
+  samples = rosban_random::getUniformSamplesMatrix(getLimits(), nb_samples, engine);
+  //std::function<double(const Eigen::VectorXd &)
+  auto f = [this](const Eigen::VectorXd & input) { return this->sample(input); };            
   if (apply_noise) {
     observations = rosban_gp::generateObservations(samples, f, observation_noise, engine);
   }
@@ -51,6 +43,16 @@ void BenchmarkFunction::getUniformSamples(int nb_samples,
   }
   // Cleaning if required
   if (cleanup) delete(engine);
+}
+
+void BenchmarkFunction::to_xml(std::ostream &out) const
+{
+  rosban_utils::xml_tools::write<double>("observation_noise", observation_noise, out);
+}
+
+void BenchmarkFunction::from_xml(TiXmlNode *node)
+{
+  rosban_utils::xml_tools::try_read<double>(node, "observation_noise", observation_noise);
 }
 
 }

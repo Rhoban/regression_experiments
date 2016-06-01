@@ -1,4 +1,5 @@
 set(SOURCES
+  basic_functions.cpp
   benchmark_function.cpp
   benchmark_function_factory.cpp
   gp_forest_solver.cpp

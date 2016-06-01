@@ -18,9 +18,13 @@ class BenchmarkConfig : public rosban_utils::Serializable
 {
 public:
   std::map<std::string, std::shared_ptr<Solver>> solvers;
-  //TODO add other informations
+  std::map<std::string, std::shared_ptr<BenchmarkFunction>> functions;
+  int nb_prediction_points;
+  int nb_trials_per_type;
+  double max_learning_time;
+  /// Maximal prediction time per point
+  double max_prediction_time;
   
-
   std::string class_name() const override
     {
       return "benchmark_config";
@@ -34,11 +38,21 @@ public:
 
   void from_xml(TiXmlNode *node)
     {
+      nb_prediction_points = rosban_utils::xml_tools::read<int>   (node, "nb_prediction_points");
+      nb_trials_per_type   = rosban_utils::xml_tools::read<int>   (node, "nb_trials_per_type"  );
+      max_learning_time    = rosban_utils::xml_tools::read<double>(node, "max_learning_time"   );
+      max_prediction_time  = rosban_utils::xml_tools::read<double>(node, "max_prediction_time" );
       // Read solvers
       SolverFactory sf;
-      std::function<std::shared_ptr<Solver>(TiXmlNode*)> value_builder;
-      value_builder = [&sf](TiXmlNode * node) { return std::shared_ptr<Solver>(sf.build(node)); };
-      solvers = rosban_utils::xml_tools::read_map(node, "solvers", value_builder);
+      std::function<std::shared_ptr<Solver>(TiXmlNode*)> solver_builder;
+      solver_builder = [&sf](TiXmlNode * node) { return std::shared_ptr<Solver>(sf.build(node)); };
+      solvers = rosban_utils::xml_tools::read_map(node, "solvers", solver_builder);
+      // Read functions
+      BenchmarkFunctionFactory bff;
+      std::function<std::shared_ptr<BenchmarkFunction>(TiXmlNode*)> bf_builder;
+      bf_builder = [&bff](TiXmlNode * node)
+        { return std::shared_ptr<BenchmarkFunction>(bff.build(node)); };
+      functions = rosban_utils::xml_tools::read_map(node, "functions", bf_builder);
     }
 };
 
@@ -47,49 +61,10 @@ int main()
   BenchmarkConfig conf;
   conf.load_file();
 
-  // Setting benchmark properties
-  int nb_prediction_points = 200;
-  int nb_trials_per_type = 10;
-  // Maximal learning time in [ms]
-  double max_learning_time = std::pow(10,5);
-  // Maximal prediction time in [ms] (10ms per predicted point)
-  double max_prediction_time = nb_prediction_points * 5;
-
   std::vector<int> nb_samples_vec;
   for (int i = 1; i <= 8; i++) {
     nb_samples_vec.push_back(25 * std::pow(2,i-1));
   }
-  std::vector<std::string> function_names =
-    {
-//      "abs",
-//      "sin",
-//      "binary",
-//      "ternary",
-//      "deterministic_abs",
-//      "deterministic_sin",
-//      "deterministic_binary",
-//      "deterministic_ternary",
-      "sinus_2dim",
-//      "binary_2dim",
-      "sinus_3dim"
-//      "binary_3dim"
-    };
-//  std::map<std::string, std::shared_ptr<Solver>> solvers =
-//    {
-//      {"pwc_forest"    , std::shared_ptr<Solver>(new PWCForestSolver()                         )},
-//      {"pwl_forest"    , std::shared_ptr<Solver>(new PWLForestSolver()                         )},
-//      {"gp_forest_sqrt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::SQRT))},
-//      {"gp_forest_curt", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::CURT))},
-//      {"gp_forest_log2", std::shared_ptr<Solver>(new GPForestSolver(GPForestSolver::Type::LOG2))},
-//      {"gp"            , std::shared_ptr<Solver>(new GPSolver()                                )}
-//    };
-
-  // replace for debug
-//  function_names = {"sinus_2dim",
-//                    "binary_2dim",
-//                    "sinus_3dim",
-//                    "binary_3dim"};
-//  function_names = {"sin", "sinus_2dim"};
 
   // Creating random engine
   auto engine = rosban_random::getRandomEngine();
@@ -117,7 +92,9 @@ int main()
           << "compute_max_time"
           << std::endl;
 
-  for (const std::string & function_name : function_names) {
+  for (auto & function_entry : conf.functions) {
+    const std::string & function_name = function_entry.first;
+    std::shared_ptr<BenchmarkFunction> function = function_entry.second;
     for (auto & solver_entry : conf.solvers) {
       const std::string & solver_name = solver_entry.first;
       std::shared_ptr<Solver> solver = solver_entry.second;
@@ -130,7 +107,7 @@ int main()
           std::cerr << "\ttrial: " << trial << "/" << nb_trials_per_type << std::endl;
           double smse, learning_time, prediction_time;
           double arg_max_loss, max_prediction_error, compute_max_time;
-          runBenchmark(function_name,
+          runBenchmark(function,
                        nb_samples,
                        solver,
                        nb_prediction_points,
@@ -165,7 +142,7 @@ int main()
         double avg_prediction_time  = total_prediction_time / nb_trials_per_type;
         // Do not compute with higher number of samples if time is already above the threshold
         if (avg_learning_time   > max_learning_time  ) break;
-        if (avg_prediction_time > max_prediction_time) break;
+        if (avg_prediction_time > max_prediction_time * nb_prediction_points) break;
       }
     }
   }
