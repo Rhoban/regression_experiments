@@ -19,6 +19,7 @@ class BenchmarkConfig : public rosban_utils::Serializable
 public:
   std::map<std::string, std::shared_ptr<Solver>> solvers;
   std::map<std::string, std::shared_ptr<BenchmarkFunction>> functions;
+  int min_samples;
   int nb_prediction_points;
   int nb_trials_per_type;
   double max_learning_time;
@@ -38,6 +39,7 @@ public:
 
   void from_xml(TiXmlNode *node)
     {
+      min_samples          = rosban_utils::xml_tools::read<int>   (node, "min_samples"         );
       nb_prediction_points = rosban_utils::xml_tools::read<int>   (node, "nb_prediction_points");
       nb_trials_per_type   = rosban_utils::xml_tools::read<int>   (node, "nb_trials_per_type"  );
       max_learning_time    = rosban_utils::xml_tools::read<double>(node, "max_learning_time"   );
@@ -62,8 +64,8 @@ int main()
   conf.load_file();
 
   std::vector<int> nb_samples_vec;
-  for (int i = 1; i <= 8; i++) {
-    nb_samples_vec.push_back(25 * std::pow(2,i-1));
+  for (int i = 1; i <= 10; i++) {
+    nb_samples_vec.push_back(conf.min_samples * std::pow(2,i-1));
   }
 
   // Creating random engine
@@ -103,14 +105,14 @@ int main()
                   << "' (" << nb_samples << " samples)" << std::endl;
         double total_prediction_time = 0;
         double total_learning_time   = 0;
-        for (int trial = 1; trial <= nb_trials_per_type; trial++) {
-          std::cerr << "\ttrial: " << trial << "/" << nb_trials_per_type << std::endl;
+        for (int trial = 1; trial <= conf.nb_trials_per_type; trial++) {
+          std::cerr << "\ttrial: " << trial << "/" << conf.nb_trials_per_type << std::endl;
           double smse, learning_time, prediction_time;
           double arg_max_loss, max_prediction_error, compute_max_time;
           runBenchmark(function,
                        nb_samples,
                        solver,
-                       nb_prediction_points,
+                       conf.nb_prediction_points,
                        smse,
                        learning_time,
                        prediction_time,
@@ -118,6 +120,9 @@ int main()
                        max_prediction_error,
                        compute_max_time,
                        &engine);
+          // prediction time per point
+          prediction_time /= conf.nb_prediction_points;
+
           double loss2, error2;
           loss2 = arg_max_loss * arg_max_loss;
           error2 = max_prediction_error * max_prediction_error;
@@ -138,11 +143,11 @@ int main()
           total_learning_time   += learning_time;
           total_prediction_time += prediction_time;
         }
-        double avg_learning_time    = total_learning_time   / nb_trials_per_type;
-        double avg_prediction_time  = total_prediction_time / nb_trials_per_type;
+        double avg_learning_time    = total_learning_time   / conf.nb_trials_per_type;
+        double avg_prediction_time  = total_prediction_time / conf.nb_trials_per_type;
         // Do not compute with higher number of samples if time is already above the threshold
-        if (avg_learning_time   > max_learning_time  ) break;
-        if (avg_prediction_time > max_prediction_time * nb_prediction_points) break;
+        if (avg_learning_time   > conf.max_learning_time  ) break;
+        if (avg_prediction_time > conf.max_prediction_time) break;
       }
     }
   }

@@ -1,10 +1,14 @@
 <benchmark_config>
+  <min_samples>25</min_samples>
+  <nb_prediction_points>100</nb_prediction_points>
+  <nb_trials_per_type>10</nb_trials_per_type>
+  <max_learning_time>10000</max_learning_time>
+  <max_prediction_time>5</max_prediction_time>
   <solvers>
     <entry>
       <key>gp</key>
       <val><gp/></val>
     </entry>
-    <entry>
     <entry>
       <key>gp_forest_sqrt</key>
       <val>
@@ -23,6 +27,7 @@
         </gp_forest>
       </val>
     </entry>
+    <entry>
       <key>gp_forest_log2</key>
       <val>
         <gp_forest>
@@ -40,4 +45,40 @@
       <val><pwl_forest/></val>
     </entry>
   </solvers>
+  <functions>
+    <entry>
+      <key>sinus_sum_3_noise</key>
+      <val>
+        <sinus_sum>
+          <nb_dimensions>3</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </sinus_sum>
+      </val>
+    </entry>
+    <entry>
+      <key>sinus_sum_3</key>
+      <val>
+        <sinus_sum>
+          <nb_dimensions>3</nb_dimensions>
+        </sinus_sum>
+      </val>
+    </entry>
+    <entry>
+      <key>abs_diff_3_noise</key>
+      <val>
+        <abs_diff>
+          <nb_dimensions>3</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </abs_diff>
+      </val>
+    </entry>
+    <entry>
+      <key>abs_diff_3</key>
+      <val>
+        <abs_diff>
+          <nb_dimensions>3</nb_dimensions>
+        </abs_diff>
+      </val>
+    </entry>
+  </functions>
 </benchmark_config>
