@@ -34,6 +34,7 @@ public:
   virtual void predict(const Eigen::MatrixXd & inputs,
                        Eigen::VectorXd & means,
                        Eigen::VectorXd & vars) override;
+  virtual void debugPrediction(const Eigen::VectorXd & input, std::ostream & out) override;
 
   virtual void gradients(const Eigen::MatrixXd & inputs,
                          Eigen::MatrixXd & gradients) override;

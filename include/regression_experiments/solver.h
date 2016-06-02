@@ -4,6 +4,9 @@
 
 #include <Eigen/Core>
 
+#include <ostream>
+#include <stdexcept>
+
 namespace regression_experiments
 {
 
@@ -30,6 +33,10 @@ public:
   /// Return argmax(f) and max(f) inside the provided limits
   virtual void getMaximum(const Eigen::MatrixXd & limits,
                           Eigen::VectorXd & input, double & output) = 0;
+
+  virtual void debugPrediction(const Eigen::VectorXd & input, std::ostream & out)
+    { throw std::logic_error("Solver::debugPrediction: Unimplemented Method:"); }
+
 };
 
 }

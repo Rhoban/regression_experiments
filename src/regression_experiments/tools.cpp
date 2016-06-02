@@ -175,6 +175,24 @@ void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
   learning_time_ms = diffMs(learning_start, learning_end);
   prediction_time_ms = diffMs(prediction_start, prediction_end);
   compute_max_time_ms = diffMs(get_max_start, get_max_end);
+
+  double suspicion_min = std::pow(10,2);
+  if (smse > suspicion_min) {
+    std::cout << "Large smse: tracking debugs" << std::endl;
+    for (int sample = 0; sample < nb_test_points; sample++) {
+      double observation = test_observations(sample);
+      double prediction = prediction_means(sample);
+      double prediction_var = prediction_vars(sample);
+      double diff2 = std::pow(observation - prediction, 2);
+      if (diff2 > suspicion_min) {
+        std::cout << "\tsample " << sample << ":" << std::endl;
+        std::cout << "\t\tprediction : " << prediction  << std::endl
+                  << "\t\tobservation: " << observation << std::endl
+                  << "\t\tdiff2      : " << diff2       << std::endl;
+        solver->debugPrediction(test_points.col(sample), std::cout);
+      }
+    }
+  }
 }
 
 void writePrediction(const std::string & path,
