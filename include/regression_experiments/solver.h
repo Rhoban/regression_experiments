@@ -35,7 +35,10 @@ public:
                           Eigen::VectorXd & input, double & output) = 0;
 
   virtual void debugPrediction(const Eigen::VectorXd & input, std::ostream & out)
-    { throw std::logic_error("Solver::debugPrediction: Unimplemented Method:"); }
+    {
+      (void)input;(void)out;
+      throw std::logic_error("Solver::debugPrediction: Unimplemented Method:");
+    }
 
 };
 
