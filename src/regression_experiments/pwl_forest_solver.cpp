@@ -46,6 +46,8 @@ void PWLForestSolver::predict(const Eigen::MatrixXd & inputs,
 void PWLForestSolver::gradients(const Eigen::MatrixXd & inputs,
                                Eigen::MatrixXd & gradients)
 {
+  (void) inputs;
+  (void) gradients;
   throw std::runtime_error("PWLForestSolver::gradients: not implemented");
 }
 
@@ -70,10 +72,14 @@ std::string PWLForestSolver::class_name() const
 
 void PWLForestSolver::to_xml(std::ostream &out) const
 {
+  (void) out;
+  throw std::runtime_error("PWLForestSolver::to_xml: unimplemented");
 }
 
 void PWLForestSolver::from_xml(TiXmlNode *node)
 {
+  (void) node;
+  throw std::runtime_error("PWLForestSolver::from_xml: unimplemented");
 }
 
 }

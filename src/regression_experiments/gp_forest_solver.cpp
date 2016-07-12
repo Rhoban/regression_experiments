@@ -55,17 +55,12 @@ void GPForestSolver::solve(const Eigen::MatrixXd & inputs,
       break;
   }
   solver.conf.nb_threads = nb_threads;
+  solver.conf.gp_conf = approximation_conf;
 
   TrainingSet ts(inputs, observations);
 
-  // save and replace config
-  rosban_gp::RandomizedRProp::Config tmp_config;
-  tmp_config = regression_forests::GPApproximation::approximation_config;
-  regression_forests::GPApproximation::approximation_config = approximation_conf;
   // Solve problem
   forest = solver.solve(ts, limits);
-  // restore config
-  regression_forests::GPApproximation::approximation_config = tmp_config;
 }
 
 void GPForestSolver::predict(const Eigen::MatrixXd & inputs,
