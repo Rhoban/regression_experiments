@@ -10,32 +10,10 @@ namespace regression_experiments
 
 SolverFactory::SolverFactory()
 {
-  registerBuilder("gp_forest",
-                  [](TiXmlNode * node)
-                  {
-                    Solver * solver = new GPForestSolver();
-                    solver->from_xml(node);
-                    return solver;
-                  });
-  registerBuilder("pwc_forest",
-                  [](TiXmlNode * node)
-                  {
-                    (void)node;
-                    return new PWCForestSolver();
-                  });
-  registerBuilder("pwl_forest",
-                  [](TiXmlNode * node)
-                  {
-                    (void)node;
-                    return new PWLForestSolver();
-                  });
-  registerBuilder("gp",
-                  [](TiXmlNode * node)
-                  {
-                    Solver * solver = new GPSolver();
-                    solver->from_xml(node);
-                    return solver;
-                  });
+  registerBuilder("gp_forest" ,[](){return std::unique_ptr<Solver>(new GPForestSolver );});
+  registerBuilder("pwc_forest",[](){return std::unique_ptr<Solver>(new PWCForestSolver);});
+  registerBuilder("pwl_forest",[](){return std::unique_ptr<Solver>(new PWLForestSolver);});
+  registerBuilder("gp"        ,[](){return std::unique_ptr<Solver>(new GPSolver       );});
 }
 
 }

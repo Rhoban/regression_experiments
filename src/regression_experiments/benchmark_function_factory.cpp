@@ -6,20 +6,8 @@ namespace regression_experiments
 
 BenchmarkFunctionFactory::BenchmarkFunctionFactory()
 {
-  registerBuilder("sinus_sum",
-                  [](TiXmlNode * node)
-                  {
-                    BenchmarkFunction * f = new SinusSum();
-                    f->from_xml(node);
-                    return f;
-                  });
-  registerBuilder("abs_diff",
-                  [](TiXmlNode * node)
-                  {
-                    BenchmarkFunction * f = new AbsDiff();
-                    f->from_xml(node);
-                    return f;
-                  });
+  registerBuilder("sinus_sum", [](){return std::unique_ptr<BenchmarkFunction>(new SinusSum);});
+  registerBuilder("abs_diff" , [](){return std::unique_ptr<BenchmarkFunction>(new AbsDiff); });
 }
 
 }
