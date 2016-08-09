@@ -1,10 +1,9 @@
 #include "regression_experiments/pwl_forest_solver.h"
 
 #include "rosban_regression_forests/algorithms/extra_trees.h"
-#include "rosban_regression_forests/approximations/approximation_type.h"
 #include "rosban_regression_forests/approximations/pwl_approximation.h"
 
-using regression_forests::ApproximationType;
+using regression_forests::Approximation;
 using regression_forests::PWLApproximation;
 using regression_forests::ExtraTrees;
 using regression_forests::TrainingSet;
@@ -24,7 +23,7 @@ void PWLForestSolver::solve(const Eigen::MatrixXd & inputs,
   ExtraTrees solver;
   solver.conf =  ExtraTrees::Config::generateAuto(limits,
                                                   observations.rows(),
-                                                  ApproximationType::PWL);
+                                                  Approximation::ID::PWL);
   TrainingSet ts(inputs, observations);
 
   forest = solver.solve(ts, limits);

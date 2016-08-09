@@ -1,10 +1,9 @@
 #include "regression_experiments/pwc_forest_solver.h"
 
 #include "rosban_regression_forests/algorithms/extra_trees.h"
-#include "rosban_regression_forests/approximations/approximation_type.h"
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 
-using regression_forests::ApproximationType;
+using regression_forests::Approximation;
 using regression_forests::PWCApproximation;
 using regression_forests::ExtraTrees;
 using regression_forests::TrainingSet;
@@ -24,7 +23,7 @@ void PWCForestSolver::solve(const Eigen::MatrixXd & inputs,
   ExtraTrees solver;
   solver.conf =  ExtraTrees::Config::generateAuto(limits,
                                                   observations.rows(),
-                                                  ApproximationType::PWC);
+                                                  Approximation::ID::PWC);
   TrainingSet ts(inputs, observations);
 
   forest = solver.solve(ts, limits);
