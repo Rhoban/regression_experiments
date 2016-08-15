@@ -1,9 +1,10 @@
 #include "regression_experiments/benchmark_function_factory.h"
-#include "regression_experiments/solver_factory.h"
 #include "regression_experiments/tools.h"
 
 #include "rosban_regression_forests/algorithms/extra_trees.h"
 #include "rosban_regression_forests/approximations/gp_approximation.h"
+
+#include "rosban_fa/trainer_factory.h"
 
 #include "rosban_random/tools.h"
 
@@ -13,11 +14,13 @@
 using namespace regression_experiments;
 
 using rosban_gp::GaussianProcess;
+using rosban_fa::Trainer;
+using rosban_fa::TrainerFactory;
 
 class BenchmarkConfig : public rosban_utils::Serializable
 {
 public:
-  std::map<std::string, std::shared_ptr<Solver>> solvers;
+  std::map<std::string, std::shared_ptr<Trainer>> trainers;
   std::map<std::string, std::shared_ptr<BenchmarkFunction>> functions;
   int min_samples;
   int nb_prediction_points;
@@ -44,11 +47,11 @@ public:
       nb_trials_per_type   = rosban_utils::xml_tools::read<int>   (node, "nb_trials_per_type"  );
       max_learning_time    = rosban_utils::xml_tools::read<double>(node, "max_learning_time"   );
       max_prediction_time  = rosban_utils::xml_tools::read<double>(node, "max_prediction_time" );
-      // Read solvers
-      SolverFactory sf;
-      std::function<std::shared_ptr<Solver>(TiXmlNode*)> solver_builder;
-      solver_builder = [&sf](TiXmlNode * node) { return std::shared_ptr<Solver>(sf.build(node)); };
-      solvers = rosban_utils::xml_tools::read_map(node, "solvers", solver_builder);
+      // Read trainers
+      TrainerFactory sf;
+      std::function<std::shared_ptr<Trainer>(TiXmlNode*)> trainer_builder;
+      trainer_builder = [&sf](TiXmlNode * node) { return std::shared_ptr<Trainer>(sf.build(node)); };
+      trainers = rosban_utils::xml_tools::read_map(node, "trainers", trainer_builder);
       // Read functions
       BenchmarkFunctionFactory bff;
       std::function<std::shared_ptr<BenchmarkFunction>(TiXmlNode*)> bf_builder;
@@ -75,7 +78,7 @@ int main()
   std::ofstream out;
   out.open("benchmark_regression.csv");
   out << "function_name,"
-      << "solver,"
+      << "trainer,"
       << "nb_samples,"
       << "smse,"
       << "learning_time,"
@@ -86,7 +89,7 @@ int main()
   std::ofstream max_out;
   max_out.open("benchmark_max.csv");
   max_out << "function_name,"
-          << "solver,"
+          << "trainer,"
           << "nb_samples,"
           << "squared_loss,"
           << "squared_error,"
@@ -97,11 +100,11 @@ int main()
   for (auto & function_entry : conf.functions) {
     const std::string & function_name = function_entry.first;
     std::shared_ptr<BenchmarkFunction> function = function_entry.second;
-    for (auto & solver_entry : conf.solvers) {
-      const std::string & solver_name = solver_entry.first;
-      std::shared_ptr<Solver> solver = solver_entry.second;
+    for (auto & trainer_entry : conf.trainers) {
+      const std::string & trainer_name = trainer_entry.first;
+      std::shared_ptr<Trainer> trainer = trainer_entry.second;
       for (int nb_samples : nb_samples_vec) {
-        std::cout << "Fitting '" << function_name << "' with '" << solver_name
+        std::cout << "Fitting '" << function_name << "' with '" << trainer_name
                   << "' (" << nb_samples << " samples)" << std::endl;
         double total_prediction_time = 0;
         double total_learning_time   = 0;
@@ -111,7 +114,7 @@ int main()
           double arg_max_loss, max_prediction_error, compute_max_time;
           runBenchmark(function,
                        nb_samples,
-                       solver,
+                       trainer,
                        conf.nb_prediction_points,
                        smse,
                        learning_time,
@@ -127,13 +130,13 @@ int main()
           loss2 = arg_max_loss * arg_max_loss;
           error2 = max_prediction_error * max_prediction_error;
           out << function_name   << ","
-              << solver_name     << ","
+              << trainer_name    << ","
               << nb_samples      << ","
               << smse            << ","
               << learning_time   << ","
               << prediction_time << std::endl;
           max_out << function_name    << ","
-                  << solver_name      << ","
+                  << trainer_name     << ","
                   << nb_samples       << ","
                   << loss2            << ","
                   << error2           << ","

@@ -1,6 +1,8 @@
 #include "regression_experiments/benchmark_function_factory.h"
-#include "regression_experiments/solver_factory.h"
 #include "regression_experiments/tools.h"
+
+#include "rosban_fa/function_approximator.h"
+#include "rosban_fa/trainer_factory.h"
 
 #include "rosban_gp/scoring.h"
 
@@ -12,6 +14,9 @@
 #include <memory>
 
 using rosban_utils::TimeStamp;
+using rosban_fa::Trainer;
+using rosban_fa::TrainerFactory;
+using rosban_fa::FunctionApproximator;
 
 namespace regression_experiments
 {
@@ -53,7 +58,7 @@ Eigen::MatrixXd discretizeSpace(const Eigen::MatrixXd & limits,
 
 void buildPrediction(const std::string & function_name,
                      int nb_samples,
-                     const std::string & solver_name,
+                     const std::string & trainer_name,
                      const std::vector<int> & points_by_dim,
                      Eigen::MatrixXd & samples_inputs,
                      Eigen::VectorXd & samples_outputs,
@@ -70,17 +75,49 @@ void buildPrediction(const std::string & function_name,
   // Generating random input
   benchmark_function->getUniformSamples(nb_samples, samples_inputs, samples_outputs, &engine);
   // Solving
-  std::unique_ptr<Solver> solver(SolverFactory().build(solver_name));
-  solver->solve(samples_inputs, samples_outputs, benchmark_function->getLimits());
-  // Predicting
+  std::unique_ptr<Trainer> trainer(TrainerFactory().build(trainer_name));
+  std::shared_ptr<const FunctionApproximator> fa;
+  fa = trainer->train(samples_inputs, samples_outputs, benchmark_function->getLimits());
+  // Discretizing space
   prediction_points = discretizeSpace(benchmark_function->getLimits(), points_by_dim);
-  solver->predict(prediction_points, prediction_means, prediction_vars);
-  solver->gradients(prediction_points, gradients);
+  // Computing predictions and variances
+  predict(fa, prediction_points, prediction_means, prediction_vars);
+  // Computing gradients
+  gradients = Eigen::MatrixXd::Zero(prediction_points.rows(), prediction_points.cols());
+  for (int i = 0; i < prediction_points.cols(); i++)
+  {
+    // Tmp variables
+    Eigen::VectorXd point_gradient;
+    // Running computation
+    fa->gradient(prediction_points.col(i), point_gradient);
+    // Filling results
+    gradients.col(i) = point_gradient;
+  }
+}
+
+void predict(std::shared_ptr<const FunctionApproximator> fa,
+             const Eigen::MatrixXd & points,
+             Eigen::VectorXd & prediction_means,
+             Eigen::VectorXd & prediction_vars)
+{
+  prediction_means = Eigen::VectorXd::Zero(points.cols());
+  prediction_vars = Eigen::VectorXd::Zero(points.cols());
+  for (int i = 0; i < points.cols(); i++)
+  {
+    // Tmp variables
+    double mean, var;
+    Eigen::VectorXd point_gradient;
+    // Running computation
+    fa->predict(points.col(i), mean, var);
+    // Filling results
+    prediction_means(i) = mean;
+    prediction_vars(i) = var;
+  }
 }
 
 void runBenchmark(const std::string & function_name,
                   int nb_samples,
-                  const std::string & solver_name,
+                  const std::string & trainer_name,
                   int nb_test_points,
                   double & smse,
                   double & learning_time_ms,
@@ -90,12 +127,12 @@ void runBenchmark(const std::string & function_name,
                   double & compute_max_time_ms,
                   std::default_random_engine * engine)
 {
-  std::shared_ptr<Solver> solver(SolverFactory().build(solver_name));
+  std::shared_ptr<Trainer> trainer(TrainerFactory().build(trainer_name));
   BenchmarkFunctionFactory bff;
   std::shared_ptr<BenchmarkFunction> function(bff.build(function_name));
   runBenchmark(function,
                nb_samples,
-               solver,
+               trainer,
                nb_test_points,
                smse,
                learning_time_ms,
@@ -108,7 +145,7 @@ void runBenchmark(const std::string & function_name,
 
 void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
                   int nb_samples,
-                  std::shared_ptr<Solver> solver,
+                  std::shared_ptr<Trainer> trainer,
                   int nb_test_points,
                   double & smse,
                   double & learning_time_ms,
@@ -135,11 +172,12 @@ void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
   function->getUniformSamples(nb_test_points, test_points, test_observations, engine);
   // Solving
   TimeStamp learning_start = TimeStamp::now();
-  solver->solve(samples_inputs, samples_outputs, function->getLimits());
+  std::shared_ptr<const FunctionApproximator> fa;
+  fa = trainer->train(samples_inputs, samples_outputs, function->getLimits());
   TimeStamp learning_end = TimeStamp::now();
   // Getting predictions for test points
   TimeStamp prediction_start = TimeStamp::now();
-  solver->predict(test_points, prediction_means, prediction_vars);
+  predict(fa, test_points, prediction_means, prediction_vars);
   TimeStamp prediction_end = TimeStamp::now();
   // Evaluating prediction
   // Clean engine if necessary
@@ -151,7 +189,7 @@ void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
   Eigen::VectorXd best_input;
   double expected_max, measured_max;
   TimeStamp get_max_start = TimeStamp::now();
-  solver->getMaximum(function->getLimits(), best_input, expected_max);
+  fa->getMaximum(function->getLimits(), best_input, expected_max);
   TimeStamp get_max_end = TimeStamp::now();
   int nb_max_tests = 1000;
   measured_max = 0;
@@ -186,10 +224,11 @@ void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
       double diff2 = std::pow(observation - prediction, 2);
       if (diff2 > suspicion_min) {
         std::cout << "\tsample " << sample << ":" << std::endl;
-        std::cout << "\t\tprediction : " << prediction  << std::endl
-                  << "\t\tobservation: " << observation << std::endl
-                  << "\t\tdiff2      : " << diff2       << std::endl;
-        solver->debugPrediction(test_points.col(sample), std::cout);
+        std::cout << "\t\tprediction     : " << prediction      << std::endl
+                  << "\t\tprediction var : " << prediction_var  << std::endl
+                  << "\t\tobservation    : " << observation     << std::endl
+                  << "\t\tdiff2          : " << diff2           << std::endl;
+        fa->debugPrediction(test_points.col(sample), std::cout);
       }
     }
   }

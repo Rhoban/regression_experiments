@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(regression_experiments)
 
 find_package(catkin REQUIRED COMPONENTS
-  rosban_regression_forests
+  rosban_fa
 )
 
 find_package(PkgConfig)
@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++11")
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES regression_experiments
-  CATKIN_DEPENDS rosban_regression_forests
+  CATKIN_DEPENDS rosban_fa
 )
 
 ###########

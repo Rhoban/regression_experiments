@@ -1,9 +1,10 @@
 #include "regression_experiments/benchmark_function_factory.h"
-#include "regression_experiments/solver_factory.h"
 #include "regression_experiments/tools.h"
 
 #include "rosban_regression_forests/algorithms/extra_trees.h"
 #include "rosban_regression_forests/approximations/gp_approximation.h"
+
+#include "rosban_fa/trainer_factory.h"
 
 #include <fstream>
 
@@ -16,8 +17,8 @@ int main()
   // Setting problem properties
   int nb_samples = 50;
   int nb_prediction_points = 1000;
-  std::string function_name("sin");
-  std::string solver_name("gp_forest");
+  std::string function_name("sinus_sum");
+  std::string solver_name("GPForestTrainer");
 
   Eigen::MatrixXd samples_inputs;
   Eigen::VectorXd samples_outputs;

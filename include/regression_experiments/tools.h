@@ -1,7 +1,9 @@
 #pragma once
 
 #include "regression_experiments/benchmark_function.h"
-#include "regression_experiments/solver.h"
+
+#include "rosban_fa/function_approximator.h"
+#include "rosban_fa/trainer.h"
 
 #include <Eigen/Core>
 
@@ -16,11 +18,11 @@ Eigen::MatrixXd discretizeSpace(const Eigen::MatrixXd & limits,
                                 const std::vector<int> & samples_by_dim);
 
 /// 1. Create random samples of the given function
-/// 2. Solve them using the chosen solver
+/// 2. Solve them using the chosen trainer
 /// 3. Predict the output on the given grid
 void buildPrediction(const std::string & function_name,
                      int nb_samples,
-                     const std::string & solver_name,
+                     const std::string & trainer_name,
                      const std::vector<int> & points_by_dim,
                      Eigen::MatrixXd & samples_inputs,
                      Eigen::VectorXd & samples_outputs,
@@ -29,12 +31,17 @@ void buildPrediction(const std::string & function_name,
                      Eigen::VectorXd & prediction_vars,
                      Eigen::MatrixXd & gradients);
 
+void predict(std::shared_ptr<const rosban_fa::FunctionApproximator> fa,
+             const Eigen::MatrixXd & points,
+             Eigen::VectorXd & prediction_means,
+             Eigen::VectorXd & prediction_vars);
+
 /// 1. Generate learning and test samples for the given function
-/// 2. Create a regression model using the chosen solver and the generated samples
+/// 2. Create a regression model using the chosen trainer and the generated samples
 /// 3. Evaluate the quality of the regression model using the test set
 void runBenchmark(const std::string & function_name,
                   int nb_samples,
-                  const std::string & solver_name,
+                  const std::string & trainer_name,
                   int nb_test_points,
                   double & smse,
                   double & learning_time_ms,
@@ -46,7 +53,7 @@ void runBenchmark(const std::string & function_name,
 
 void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
                   int nb_samples,
-                  std::shared_ptr<Solver> solver,
+                  std::shared_ptr<rosban_fa::Trainer> trainer,
                   int nb_test_points,
                   double & smse,
                   double & learning_time_ms,
