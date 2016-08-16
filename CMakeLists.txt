@@ -57,6 +57,12 @@ target_link_libraries(test_gp_approximations
   ${catkin_LIBRARIES}
   )
 
+add_executable(test_1d_regression src/test_1d_regression.cpp)
+target_link_libraries(test_1d_regression
+  regression_experiments
+  ${catkin_LIBRARIES}
+  )
+
 add_executable(benchmark_regression src/benchmark_regression.cpp)
 target_link_libraries(benchmark_regression
   regression_experiments

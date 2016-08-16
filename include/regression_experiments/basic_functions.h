@@ -45,4 +45,37 @@ private:
   int nb_dimensions;
 };
 
+/// In this class, f(x) is divided in two parts:
+/// if Exists x_i > threshold_i:
+/// -> failure_value
+/// else
+/// -> sum(a_i * x_i)
+class Discontinuity : public BenchmarkFunction
+{
+public:
+  Discontinuity(int nb_dimensions = 1);
+
+  virtual void setNbDimensions(int new_nb_dimensions);
+
+  virtual Eigen::MatrixXd getLimits() override;
+  virtual double sample(const Eigen::VectorXd & input) override;
+  virtual double getMax() override;
+
+  virtual std::string class_name() const override;
+  virtual void to_xml(std::ostream &out) const override;
+  virtual void from_xml(TiXmlNode *node) override;
+
+private:
+  /// Limits: [-input_max, input_max]
+  double input_max;
+  /// Input dimensions
+  int nb_dimensions;
+  /// Thresholds
+  Eigen::VectorXd thresholds;
+  /// Value on failure
+  double failure_value;
+  /// Coefficients
+  Eigen::VectorXd coeffs;
+};
+
 }

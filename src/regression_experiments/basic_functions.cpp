@@ -95,4 +95,63 @@ void AbsDiff::from_xml(TiXmlNode *node)
   rosban_utils::xml_tools::try_read<int>   (node, "nb_dimensions", nb_dimensions);
 }
 
+Discontinuity::Discontinuity(int nb_dimensions_)
+  : input_max(1), failure_value(-10)
+{
+  setNbDimensions(nb_dimensions_);
+}
+
+void Discontinuity::setNbDimensions(int nb_dimensions_)
+{
+  nb_dimensions = nb_dimensions_;
+  thresholds = Eigen::VectorXd::Zero(nb_dimensions);
+  coeffs = Eigen::VectorXd::Constant(nb_dimensions, 1.0);
+}
+
+Eigen::MatrixXd Discontinuity::getLimits()
+{
+  Eigen::MatrixXd limits(nb_dimensions, 2);
+  limits.col(0) = Eigen::VectorXd::Constant(nb_dimensions, -input_max);
+  limits.col(1) = Eigen::VectorXd::Constant(nb_dimensions,  input_max);
+  return limits;
+}
+
+double Discontinuity::sample(const Eigen::VectorXd & input)
+{
+  if (input.rows() != nb_dimensions) {
+    std::ostringstream oss;
+    oss << "Discontuity::sample: invalid input size: " << input.rows()
+        << " (expecting " << nb_dimensions << ")";
+    throw std::logic_error(oss.str());
+  }
+  for (int dim = 0; dim < nb_dimensions; dim++) {
+    if (input(dim) > thresholds(dim)) return failure_value;
+  }
+  return coeffs.dot(input);
+}
+  
+double Discontinuity::getMax()
+{
+  // All coeffs are positive
+  return sample(thresholds);
+}
+
+std::string Discontinuity::class_name() const
+{
+  return "discontinuity";
+}
+
+void Discontinuity::to_xml(std::ostream &out) const
+{
+  rosban_utils::xml_tools::write<int>   ("nb_dimensions", nb_dimensions, out);
+  //TODO handle other paramters
+}
+
+void Discontinuity::from_xml(TiXmlNode *node)
+{
+  rosban_utils::xml_tools::try_read<int>   (node, "nb_dimensions", nb_dimensions);
+  setNbDimensions(nb_dimensions);
+  //TODO handle other parameters
+}
+
 }

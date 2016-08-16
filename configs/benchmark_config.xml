@@ -1,75 +1,40 @@
 <benchmark_config>
-  <min_samples>25</min_samples>
+  <min_samples>10</min_samples>
   <nb_prediction_points>100</nb_prediction_points>
   <nb_trials_per_type>10</nb_trials_per_type>
   <max_learning_time>10000</max_learning_time>
   <max_prediction_time>5</max_prediction_time>
-  <solvers>
+  <nb_threads>3</nb_threads>
+  <trainers>
     <entry>
       <key>gp</key>
-      <val><gp/></val>
+      <val><GPTrainer/></val>
     </entry>
     <entry>
-      <key>gp_forest_sqrt</key>
+      <key>gp_forest</key>
       <val>
-        <gp_forest>
-          <type>SQRT</type>
-          <nb_threads>1</nb_threads>
-        </gp_forest>
-      </val>
-    </entry>
-    <entry>
-      <key>gp_forest_curt</key>
-      <val>
-        <gp_forest>
-          <type>CURT</type>
-          <nb_threads>1</nb_threads>
-        </gp_forest>
-      </val>
-    </entry>
-    <entry>
-      <key>gp_forest_log2</key>
-      <val>
-        <gp_forest>
+        <GPForestTrainer>
           <type>LOG2</type>
-          <nb_threads>1</nb_threads>
-        </gp_forest>
+        </GPForestTrainer>
       </val>
     </entry>
     <entry>
       <key>pwc_forest</key>
-      <val><pwc_forest/></val>
+      <val><PWCForestTrainer/></val>
     </entry>
     <entry>
       <key>pwl_forest</key>
-      <val><pwl_forest/></val>
+      <val><PWLForestTrainer/></val>
     </entry>
-  </solvers>
+  </trainers>
   <functions>
-    <entry>
-      <key>sinus_sum_3_noise</key>
-      <val>
-        <sinus_sum>
-          <nb_dimensions>3</nb_dimensions>
-          <observation_noise>0.05</observation_noise>
-        </sinus_sum>
-      </val>
-    </entry>
     <entry>
       <key>sinus_sum_3</key>
       <val>
         <sinus_sum>
           <nb_dimensions>3</nb_dimensions>
-        </sinus_sum>
-      </val>
-    </entry>
-    <entry>
-      <key>abs_diff_3_noise</key>
-      <val>
-        <abs_diff>
-          <nb_dimensions>3</nb_dimensions>
           <observation_noise>0.05</observation_noise>
-        </abs_diff>
+        </sinus_sum>
       </val>
     </entry>
     <entry>
@@ -77,7 +42,44 @@
       <val>
         <abs_diff>
           <nb_dimensions>3</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
         </abs_diff>
+      </val>
+    </entry>
+    <entry>
+      <key>discontinuity_3</key>
+      <val>
+        <discontinuity>
+          <nb_dimensions>3</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </discontinuity>
+      </val>
+    </entry>
+    <entry>
+      <key>sinus_sum_6</key>
+      <val>
+        <sinus_sum>
+          <nb_dimensions>6</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </sinus_sum>
+      </val>
+    </entry>
+    <entry>
+      <key>abs_diff_6</key>
+      <val>
+        <abs_diff>
+          <nb_dimensions>6</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </abs_diff>
+      </val>
+    </entry>
+    <entry>
+      <key>discontinuity_6</key>
+      <val>
+        <discontinuity>
+          <nb_dimensions>6</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </discontinuity>
       </val>
     </entry>
   </functions>

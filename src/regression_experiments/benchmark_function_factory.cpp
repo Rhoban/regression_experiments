@@ -8,6 +8,8 @@ BenchmarkFunctionFactory::BenchmarkFunctionFactory()
 {
   registerBuilder("sinus_sum", [](){return std::unique_ptr<BenchmarkFunction>(new SinusSum);});
   registerBuilder("abs_diff" , [](){return std::unique_ptr<BenchmarkFunction>(new AbsDiff); });
+  registerBuilder("discontinuity",
+                  [](){return std::unique_ptr<BenchmarkFunction>(new Discontinuity);});
 }
 
 }

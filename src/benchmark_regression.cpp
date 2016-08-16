@@ -25,9 +25,11 @@ public:
   int min_samples;
   int nb_prediction_points;
   int nb_trials_per_type;
+  // Maximal learning time in ms
   double max_learning_time;
-  /// Maximal prediction time per point
+  /// Maximal prediction time per point in ms
   double max_prediction_time;
+  int nb_threads;
   
   std::string class_name() const override
     {
@@ -42,6 +44,7 @@ public:
 
   void from_xml(TiXmlNode *node)
     {
+      nb_threads           = rosban_utils::xml_tools::read<int>   (node, "nb_threads"          );
       min_samples          = rosban_utils::xml_tools::read<int>   (node, "min_samples"         );
       nb_prediction_points = rosban_utils::xml_tools::read<int>   (node, "nb_prediction_points");
       nb_trials_per_type   = rosban_utils::xml_tools::read<int>   (node, "nb_trials_per_type"  );
@@ -103,6 +106,7 @@ int main()
     for (auto & trainer_entry : conf.trainers) {
       const std::string & trainer_name = trainer_entry.first;
       std::shared_ptr<Trainer> trainer = trainer_entry.second;
+      trainer->setNbThreads(conf.nb_threads);
       for (int nb_samples : nb_samples_vec) {
         std::cout << "Fitting '" << function_name << "' with '" << trainer_name
                   << "' (" << nb_samples << " samples)" << std::endl;
