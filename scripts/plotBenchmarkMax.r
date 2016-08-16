@@ -50,19 +50,20 @@ for (i in 1:length(args))
     plots <- list()
     for (col in c("squared_loss","squared_error","learning_time","compute_max_time")) {
         internalData <- summarySE(data, measurevar=col, groupvars = c("function_name",
-                                                                      "solver",
+                                                                      "trainer",
                                                                       "nb_samples"))
         g <- ggplot(internalData, aes_string(x="nb_samples", y=col,
                                      ymin=sprintf("%s-ci",col),
                                      ymax=sprintf("%s+ci",col),
-                                     group = "solver", color = "solver", fill = "solver"))
+                                     group = "trainer", color = "trainer", fill = "trainer"))
         g <- g + facet_wrap(~function_name, nrow = 1, scales = "free")
         g <- g + geom_ribbon(size = 0.1, alpha=0.1)
         g <- g + geom_point(size = 1, shape='x')
         g <- g + geom_line(size = 0.5)
 #        g <- g + geom_errorbar(color="black", width=0.01)
-        g <- g + scale_x_log10(breaks=25 * (2 ** seq(1,10)))
+        g <- g + scale_x_log10(breaks=10 * (2 ** seq(1,10)))
         g <- g + scale_y_log10()#sometimes getting problems with squared_loss = 0
+        g <- g + theme(axis.text.x = element_text(angle = 90, hjust=1, vjust=0.5))
         plots <- c(plots,list(g))
     }
     finalG <- arrangeGrob(grobs=plots,nrow=4)

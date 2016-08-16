@@ -70,7 +70,7 @@ int main()
   conf.load_file();
 
   std::vector<int> nb_samples_vec;
-  for (int i = 1; i <= 10; i++) {
+  for (int i = 1; i <= 15; i++) {
     nb_samples_vec.push_back(conf.min_samples * std::pow(2,i-1));
   }
 

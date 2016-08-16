@@ -29,6 +29,33 @@
   </trainers>
   <functions>
     <entry>
+      <key>sinus_sum_1</key>
+      <val>
+        <sinus_sum>
+          <nb_dimensions>1</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </sinus_sum>
+      </val>
+    </entry>
+    <entry>
+      <key>abs_diff_1</key>
+      <val>
+        <abs_diff>
+          <nb_dimensions>1</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </abs_diff>
+      </val>
+    </entry>
+    <entry>
+      <key>discontinuity_1</key>
+      <val>
+        <discontinuity>
+          <nb_dimensions>1</nb_dimensions>
+          <observation_noise>0.05</observation_noise>
+        </discontinuity>
+      </val>
+    </entry>
+    <entry>
       <key>sinus_sum_3</key>
       <val>
         <sinus_sum>
