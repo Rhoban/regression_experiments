@@ -2,10 +2,12 @@
   <min_samples>10</min_samples>
   <nb_prediction_points>100</nb_prediction_points>
   <nb_trials_per_type>10</nb_trials_per_type>
-  <max_learning_time>10000</max_learning_time>
-  <max_prediction_time>5</max_prediction_time>
+  <max_learning_time>5</max_learning_time>
+  <max_prediction_time>0.005</max_prediction_time>
+  <eval_max>true</eval_max>
+  <max_compute_max_time>5</max_compute_max_time>
   <nb_threads>3</nb_threads>
-  <trainers>
+  <methods>
     <entry>
       <key>gp</key>
       <val><GPTrainer/></val>
@@ -26,7 +28,7 @@
       <key>pwl_forest</key>
       <val><PWLForestTrainer/></val>
     </entry>
-  </trainers>
+  </methods>
   <functions>
     <entry>
       <key>sinus_sum_1</key>

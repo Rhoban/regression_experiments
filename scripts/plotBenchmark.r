@@ -74,7 +74,7 @@ compareMax <- function (data, dst)
         g <- g + theme(axis.text.x = element_text(angle = 90, hjust=1, vjust=0.5))
         plots <- c(plots,list(g))
     }
-    finalG <- arrangeGrob(grobs=plots,nrow=4)
+    finalG <- arrangeGrob(grobs=plots,nrow=3)
     ggsave(dst, finalG, width=16, height=9)    
 }
 
