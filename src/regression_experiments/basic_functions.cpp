@@ -8,7 +8,7 @@ SinusSum::SinusSum(int nb_cycles_, int nb_dimensions_)
     nb_dimensions(nb_dimensions_)
 {}
 
-Eigen::MatrixXd SinusSum::getLimits()
+Eigen::MatrixXd SinusSum::getLimits() const
 {
   Eigen::MatrixXd limits(nb_dimensions, 2);
   limits.col(0) = Eigen::VectorXd::Constant(nb_dimensions, -M_PI * nb_cycles);
@@ -16,7 +16,7 @@ Eigen::MatrixXd SinusSum::getLimits()
   return limits;
 }
 
-double SinusSum::sample(const Eigen::VectorXd & input)
+double SinusSum::sample(const Eigen::VectorXd & input) const
 {
   double total = 0;
   for (int dim = 0; dim < nb_dimensions; dim++) {
@@ -25,7 +25,7 @@ double SinusSum::sample(const Eigen::VectorXd & input)
   return total;
 }
 
-double SinusSum::getMax()
+double SinusSum::getMax() const
 {
   return nb_dimensions;
 }
@@ -54,7 +54,7 @@ AbsDiff::AbsDiff(double input_max_, int nb_dimensions_)
     nb_dimensions(nb_dimensions_)
 {}
 
-Eigen::MatrixXd AbsDiff::getLimits()
+Eigen::MatrixXd AbsDiff::getLimits() const
 {
   Eigen::MatrixXd limits(nb_dimensions, 2);
   limits.col(0) = Eigen::VectorXd::Constant(nb_dimensions, -input_max);
@@ -62,7 +62,7 @@ Eigen::MatrixXd AbsDiff::getLimits()
   return limits;
 }
 
-double AbsDiff::sample(const Eigen::VectorXd & input)
+double AbsDiff::sample(const Eigen::VectorXd & input) const
 {
   double total = 0;
   for (int dim = 0; dim < nb_dimensions; dim++) {
@@ -71,7 +71,7 @@ double AbsDiff::sample(const Eigen::VectorXd & input)
   return total;
 }
 
-double AbsDiff::getMax()
+double AbsDiff::getMax() const
 {
   return 0;
 }
@@ -108,7 +108,7 @@ void Discontinuity::setNbDimensions(int nb_dimensions_)
   coeffs = Eigen::VectorXd::Constant(nb_dimensions, 1.0);
 }
 
-Eigen::MatrixXd Discontinuity::getLimits()
+Eigen::MatrixXd Discontinuity::getLimits() const
 {
   Eigen::MatrixXd limits(nb_dimensions, 2);
   limits.col(0) = Eigen::VectorXd::Constant(nb_dimensions, -input_max);
@@ -116,7 +116,7 @@ Eigen::MatrixXd Discontinuity::getLimits()
   return limits;
 }
 
-double Discontinuity::sample(const Eigen::VectorXd & input)
+double Discontinuity::sample(const Eigen::VectorXd & input) const
 {
   if (input.rows() != nb_dimensions) {
     std::ostringstream oss;
@@ -130,7 +130,7 @@ double Discontinuity::sample(const Eigen::VectorXd & input)
   return coeffs.dot(input);
 }
   
-double Discontinuity::getMax()
+double Discontinuity::getMax() const
 {
   // All coeffs are positive
   return sample(thresholds);

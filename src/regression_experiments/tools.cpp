@@ -120,11 +120,11 @@ void runBenchmark(const std::string & function_name,
                   const std::string & trainer_name,
                   int nb_test_points,
                   double & smse,
-                  double & learning_time_ms,
-                  double & prediction_time_ms,
+                  double & learning_time,
+                  double & prediction_time,
                   double & arg_max_loss,
                   double & max_prediction_error,
-                  double & compute_max_time_ms,
+                  double & compute_max_time,
                   std::default_random_engine * engine)
 {
   std::shared_ptr<Trainer> trainer(TrainerFactory().build(trainer_name));
@@ -135,24 +135,24 @@ void runBenchmark(const std::string & function_name,
                trainer,
                nb_test_points,
                smse,
-               learning_time_ms,
-               prediction_time_ms,
+               learning_time,
+               prediction_time,
                arg_max_loss,
                max_prediction_error,
-               compute_max_time_ms,
+               compute_max_time,
                engine);
 }
 
-void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
+void runBenchmark(std::shared_ptr<const BenchmarkFunction> function,
                   int nb_samples,
-                  std::shared_ptr<Trainer> trainer,
+                  std::shared_ptr<const Trainer> trainer,
                   int nb_test_points,
                   double & smse,
-                  double & learning_time_ms,
-                  double & prediction_time_ms,
+                  double & learning_time,
+                  double & prediction_time,
                   double & arg_max_loss,
                   double & max_prediction_error,
-                  double & compute_max_time_ms,
+                  double & compute_max_time,
                   std::default_random_engine * engine)
 {
   // Internal data:
@@ -210,9 +210,9 @@ void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
 
   // Computing output values
   smse = rosban_gp::computeSMSE(test_observations, prediction_means);
-  learning_time_ms = diffMs(learning_start, learning_end);
-  prediction_time_ms = diffMs(prediction_start, prediction_end);
-  compute_max_time_ms = diffMs(get_max_start, get_max_end);
+  learning_time = diffSec(learning_start, learning_end);
+  prediction_time = diffSec(prediction_start, prediction_end);
+  compute_max_time = diffSec(get_max_start, get_max_end);
 
   // Temporary disabling debug (not implemented for all trainers)
   //double suspicion_min = std::pow(10,2);

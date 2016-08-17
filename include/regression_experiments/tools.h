@@ -39,28 +39,29 @@ void predict(std::shared_ptr<const rosban_fa::FunctionApproximator> fa,
 /// 1. Generate learning and test samples for the given function
 /// 2. Create a regression model using the chosen trainer and the generated samples
 /// 3. Evaluate the quality of the regression model using the test set
+/// All time are in ms
 void runBenchmark(const std::string & function_name,
                   int nb_samples,
                   const std::string & trainer_name,
                   int nb_test_points,
                   double & smse,
-                  double & learning_time_ms,
-                  double & prediction_time_ms,
+                  double & learning_time,
+                  double & prediction_time,
                   double & arg_max_loss,
                   double & max_prediction_error,
-                  double & compute_max_time_ms,
+                  double & compute_max_time,
                   std::default_random_engine * engine);
 
-void runBenchmark(std::shared_ptr<BenchmarkFunction> function,
+void runBenchmark(std::shared_ptr<const BenchmarkFunction> function,
                   int nb_samples,
-                  std::shared_ptr<rosban_fa::Trainer> trainer,
+                  std::shared_ptr<const rosban_fa::Trainer> trainer,
                   int nb_test_points,
                   double & smse,
-                  double & learning_time_ms,
-                  double & prediction_time_ms,
+                  double & learning_time,
+                  double & prediction_time,
                   double & arg_max_loss,
                   double & max_prediction_error,
-                  double & compute_max_time_ms,
+                  double & compute_max_time,
                   std::default_random_engine * engine);
 
 void writePrediction(const std::string & path,

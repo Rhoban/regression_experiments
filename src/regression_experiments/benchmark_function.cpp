@@ -13,7 +13,7 @@ BenchmarkFunction::BenchmarkFunction(double observation_noise_)
   : observation_noise(observation_noise_)
 {}
 
-double BenchmarkFunction::getMax()
+double BenchmarkFunction::getMax() const
 {
   throw std::runtime_error("Unimplemented getMax for given function");
 }
@@ -22,7 +22,7 @@ void BenchmarkFunction::getUniformSamples(int nb_samples,
                                           Eigen::MatrixXd & samples,
                                           Eigen::VectorXd & observations,
                                           std::default_random_engine * engine,
-                                          bool apply_noise)
+                                          bool apply_noise) const
 {
   // Generating random engine if none has been provided
   bool cleanup = false;
