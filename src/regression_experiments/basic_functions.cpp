@@ -143,12 +143,14 @@ std::string Discontinuity::class_name() const
 
 void Discontinuity::to_xml(std::ostream &out) const
 {
+  BenchmarkFunction::to_xml(out);
   rosban_utils::xml_tools::write<int>   ("nb_dimensions", nb_dimensions, out);
   //TODO handle other paramters
 }
 
 void Discontinuity::from_xml(TiXmlNode *node)
 {
+  BenchmarkFunction::from_xml(node);
   rosban_utils::xml_tools::try_read<int>   (node, "nb_dimensions", nb_dimensions);
   setNbDimensions(nb_dimensions);
   //TODO handle other parameters
