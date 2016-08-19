@@ -80,14 +80,11 @@ compareMax <- function (data, dst)
 
 compareSMSE <- function (data, dst)
 {
-    print("toto:")
-    print(names(data))
     plots <- list()
     for (col in c("smse","learning_time","prediction_time")) {
         internalData <- summarySE(data, measurevar=col, groupvars = c("function_name",
                                                                       "group",
                                                                       "nb_samples"))
-        print(internalData)
         g <- ggplot(internalData, aes_string(x="nb_samples", y=col,
                                              ymin=sprintf("%s-ci",col),
                                              ymax=sprintf("%s+ci",col),
@@ -102,7 +99,12 @@ compareSMSE <- function (data, dst)
         plots <- c(plots,list(g))
     }
     finalG <- arrangeGrob(grobs=plots,nrow=3)
-    ggsave(dst, finalG, width=16, height=9)
+    # If meaningfull, produce a 16:9 image, otherwise produce a larger image
+    plotHeight <- 9
+    plotWidth <- 16
+    nbFunctions <-length(unique(data$function_name))
+    if (nbFunctions > 3) { plotWidth <- plotHeight * nbFunctions * 16 / 9 / 3 }
+    ggsave(dst, finalG, width=plotWidth, height=plotHeight)
 }
 
 compareByCategories <- function (categories)
@@ -111,7 +113,6 @@ compareByCategories <- function (categories)
     data <- NULL
     for (catName in names(categories))
     {
-        print (catName)
         for (path in categories[[catName]])
         {
             pathData <- read.csv(path)
@@ -124,7 +125,6 @@ compareByCategories <- function (categories)
             }
         }
     }
-    print(data)
     #STEP 2: create groups:
     if (length(categories) > 1) {
         data$group = sprintf("%s:%s", data$category, data$method)
@@ -149,7 +149,5 @@ if (length(args) < 1) {
 }
 
 categories <- argsToCategories(args)
-
-print(categories)
 
 compareByCategories(categories)
