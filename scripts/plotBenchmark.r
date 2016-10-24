@@ -1,5 +1,6 @@
 library(ggplot2)
 library(gridExtra)
+library(plyr)
 library(stringr)
 library(Rmisc)
 
@@ -58,20 +59,31 @@ compareMax <- function (data, dst)
 {
     plots <- list()
     for (col in c("squared_loss","squared_error","compute_max_time")) {
-        internalData <- summarySE(data, measurevar=col, groupvars = c("function_name",
-                                                                      "group",
-                                                                      "nb_samples"))
-        g <- ggplot(internalData, aes_string(x="nb_samples", y=col,
-                                             ymin=sprintf("%s-ci",col),
-                                             ymax=sprintf("%s+ci",col),
+        internalData <- data
+        internalData$y = data[,col]
+        groupVar <- c("function_name", "group", "nb_samples")
+        #internalData <- summarySE(data, measurevar=col, groupvars = c("function_name",
+        #                                                              "group",
+        #                                                              "nb_samples"))
+        #internalData$ymin = internalData[,col] - internalData$ci
+        #internalData$ymax = internalData[,col] + internalData$ci
+        internalData <- ddply(internalData, groupVar, summarise,
+                              mean = mean(y),
+                              median = quantile(y, probs=c(0.5)),
+                              ymin = quantile(y, probs=c(0.45)),
+                              ymax = quantile(y, probs=c(0.55)))
+        print(internalData)
+        g <- ggplot(internalData, aes_string(x = "nb_samples", y = "mean",
+                                             ymin = "ymin", ymax = "ymax",
                                              group = "group", color = "group", fill = "group"))
         g <- g + facet_wrap(~function_name, nrow = 1, scales = "free")
         g <- g + geom_ribbon(size = 0.1, alpha=0.1)
         g <- g + geom_point(size = 1, shape='x')
         g <- g + geom_line(size = 0.5)
-        g <- g + scale_x_log10(breaks=10 * (2 ** seq(1,20)))
+        g <- g + scale_x_log10(breaks=10 * (2 ** seq(0,20)))
         g <- g + scale_y_log10()
         g <- g + theme(axis.text.x = element_text(angle = 90, hjust=1, vjust=0.5))
+        g <- g + ylab(col)
         plots <- c(plots,list(g))
     }
     finalG <- arrangeGrob(grobs=plots,nrow=3)
@@ -82,20 +94,31 @@ compareSMSE <- function (data, dst)
 {
     plots <- list()
     for (col in c("smse","learning_time","prediction_time")) {
-        internalData <- summarySE(data, measurevar=col, groupvars = c("function_name",
-                                                                      "group",
-                                                                      "nb_samples"))
-        g <- ggplot(internalData, aes_string(x="nb_samples", y=col,
-                                             ymin=sprintf("%s-ci",col),
-                                             ymax=sprintf("%s+ci",col),
-                                             group = "group", color = "group", fill="group"))
+        internalData <- data
+        internalData$y = data[,col]
+        groupVar <- c("function_name", "group", "nb_samples")
+        #internalData <- summarySE(data, measurevar=col, groupvars = c("function_name",
+        #                                                              "group",
+        #                                                              "nb_samples"))
+        #internalData$ymin = internalData[,col] - internalData$ci
+        #internalData$ymax = internalData[,col] + internalData$ci
+        internalData <- ddply(internalData, groupVar, summarise,
+                              mean = mean(y),
+                              median = quantile(y, probs=c(0.5)),
+                              ymin = quantile(y, probs=c(0.4)),
+                              ymax = quantile(y, probs=c(0.6)))
+        print(internalData)
+        g <- ggplot(internalData, aes_string(x = "nb_samples", y = "mean",
+                                             ymin = "ymin", ymax = "ymax",
+                                             group = "group", color = "group", fill = "group"))
         g <- g + facet_wrap(~function_name, nrow = 1, scales = "free")
         g <- g + geom_ribbon(size = 0.1, alpha=0.1)
         g <- g + geom_point(size = 1, shape='x')
         g <- g + geom_line(size = 0.5)
-        g <- g + scale_x_log10(breaks=10 * 2 ** seq(1,20))
+        g <- g + scale_x_log10(breaks=10 * 2 ** seq(0,20))
         g <- g + scale_y_log10()
         g <- g + theme(axis.text.x = element_text(angle = 90, hjust=1, vjust=0.5))
+        g <- g + ylab(col)
         plots <- c(plots,list(g))
     }
     finalG <- arrangeGrob(grobs=plots,nrow=3)
