@@ -65,3 +65,9 @@ target_link_libraries(benchmark_regression
   regression_experiments
   ${catkin_LIBRARIES}
   )
+
+add_executable(build_forests_predictions src/build_forests_predictions.cpp)
+target_link_libraries(build_forests_predictions
+  regression_experiments
+  ${catkin_LIBRARIES}
+  )
