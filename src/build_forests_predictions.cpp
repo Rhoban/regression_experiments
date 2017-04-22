@@ -9,7 +9,7 @@
 
 using namespace regression_experiments;
 
-int main(int argc, char ** argv)
+int main()
 {
   // Random initialization
   auto engine = rosban_random::getRandomEngine();
