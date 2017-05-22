@@ -19,7 +19,6 @@ catkin_package(
 
 include_directories(
   include
-  ${EIGEN3_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
   )
 
